@@ -67,6 +67,14 @@ public class HexGrid : MonoBehaviour
             meshFilter = gameObject.AddComponent<MeshFilter>();
         }
         meshFilter.mesh = mesh;
+        MeshCollider meshCollider = GetComponent<MeshCollider>();
+        if (meshCollider == null)
+        {
+            meshCollider = gameObject.AddComponent<MeshCollider>();
+        }
+        meshCollider.sharedMesh = mesh;
+
+        gameObject.layer = LayerMask.NameToLayer("Grid");
     }
     //TODO: Store the individual tiles in an array
     //TODO: Methods to get, change, add , and remove tiles
