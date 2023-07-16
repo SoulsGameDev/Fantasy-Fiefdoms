@@ -31,7 +31,8 @@ public class MouseController : MonoBehaviour
             Debug.Log("Hit object: " + hit.transform.name + " at position " + hit.point);
             float localX = hit.point.x - hit.transform.position.x;
             float localZ = hit.point.z - hit.transform.position.z;
-            Debug.Log("Hex position: " + HexMetrics.CoordinateToHex(localX, localZ, grid.HexSize, grid.Orientation));
+            //Debug.Log("Hex position: " + HexMetrics.CoordinateToAxial(localX, localZ, grid.HexSize, grid.Orientation));
+            Debug.Log("Offset Position: " + HexMetrics.CoordinateToOffset(localX, localZ, grid.HexSize, grid.Orientation));
         }
     }
 }
