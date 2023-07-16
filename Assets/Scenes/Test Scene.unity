@@ -410,8 +410,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Orientation>k__BackingField: 1
-  <Width>k__BackingField: 3
-  <Height>k__BackingField: 3
+  <Width>k__BackingField: 5
+  <Height>k__BackingField: 5
   <HexSize>k__BackingField: 5
   <HexPrefab>k__BackingField: {fileID: 0}
 --- !u!4 &2119458583
