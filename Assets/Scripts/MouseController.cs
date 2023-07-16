@@ -29,7 +29,9 @@ public class MouseController : MonoBehaviour
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             Debug.Log("Hit object: " + hit.transform.name + " at position " + hit.point);
-            Debug.Log("Hex position: " + HexMetrics.CoordinateToHex(hit.point.x, hit.point.z, grid.HexSize, grid.Orientation));
+            float localX = hit.point.x - hit.transform.position.x;
+            float localZ = hit.point.z - hit.transform.position.z;
+            Debug.Log("Hex position: " + HexMetrics.CoordinateToHex(localX, localZ, grid.HexSize, grid.Orientation));
         }
     }
 }
