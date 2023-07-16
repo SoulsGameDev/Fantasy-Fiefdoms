@@ -26,7 +26,7 @@ public class HexGrid : MonoBehaviour
         {
             for (int x = 0; x < Width; x++)
             {
-                Vector3 centrePosition = HexMetrics.Center(HexSize, x, z, Orientation) + transform.position;
+                Vector3 centrePosition = HexMetrics.Center(HexSize, x, z, Orientation);
                 vertices[(z * Width + x) * 7] = centrePosition;
                 for (int s = 0; s < HexMetrics.Corners(HexSize, Orientation).Length; s++)
                 {
