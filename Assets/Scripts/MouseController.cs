@@ -1,38 +1,44 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MouseController : MonoBehaviour
 {
-    public LayerMask gridLayerMask;
-
-    public HexGrid grid;
+    public static MouseController Instance { get; private set; }
+    public Action<RaycastHit> OnLeftMouseClick;
+    public Action<RaycastHit> OnRightMouseClick;
+    public Action<RaycastHit> OnMiddleMouseClick;
 
     private void Awake()
     {
-        grid = FindObjectOfType<HexGrid>();
+        if (Instance != null)
+            Destroy(this);
+        else
+            Instance = this;
     }
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            CheckMouseClick(gridLayerMask);
+            CheckMouseClick(0);
         }
     }
 
-    void CheckMouseClick(LayerMask layerMask)
+    void CheckMouseClick(int mouseButton)
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity))
         {
-            Debug.Log("Hit object: " + hit.transform.name + " at position " + hit.point);
-            float localX = hit.point.x - hit.transform.position.x;
-            float localZ = hit.point.z - hit.transform.position.z;
-            //Debug.Log("Hex position: " + HexMetrics.CoordinateToAxial(localX, localZ, grid.HexSize, grid.Orientation));
-            Debug.Log("Offset Position: " + HexMetrics.CoordinateToOffset(localX, localZ, grid.HexSize, grid.Orientation));
+            if (mouseButton == 0)
+                OnLeftMouseClick?.Invoke(hit);
+            else if (mouseButton == 1)
+                OnRightMouseClick?.Invoke(hit);
+            else if (mouseButton == 2)
+                OnMiddleMouseClick?.Invoke(hit);
         }
     }
 }
