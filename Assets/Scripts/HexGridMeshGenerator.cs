@@ -14,8 +14,8 @@ public class HexGridMeshGenerator : MonoBehaviour
     {
         if(hexGrid == null)
             hexGrid = GetComponentInParent<HexGrid>();
-
-
+        if (hexGrid == null)
+            Debug.LogError("HexGridMeshGenerator could not find a HexGrid component in its parent or itself.");
     }
 
     private void OnEnable()
@@ -43,6 +43,7 @@ public class HexGridMeshGenerator : MonoBehaviour
 
     public void CreateHexMesh(int width, int height, float hexSize, HexOrientation orientation, LayerMask layerMask)
     {
+        ClearHexGridMesh();
         Vector3[] vertices = new Vector3[7 * width * height];
 
         for (int z = 0; z < height; z++)
