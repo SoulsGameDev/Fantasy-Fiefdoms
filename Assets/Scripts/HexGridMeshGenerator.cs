@@ -10,6 +10,7 @@ public class HexGridMeshGenerator : MonoBehaviour
     [field: SerializeField] public LayerMask gridLayer { get; private set; }
     [field:SerializeField] public HexGrid hexGrid { get; private set; }
 
+
     private void Awake()
     {
         if(hexGrid == null)
@@ -97,6 +98,8 @@ public class HexGridMeshGenerator : MonoBehaviour
 
     public void ClearHexGridMesh()
     {
+        if (GetComponent<MeshFilter>().sharedMesh == null)
+            return;
         GetComponent<MeshFilter>().sharedMesh.Clear();
         GetComponent<MeshCollider>().sharedMesh.Clear();
     }

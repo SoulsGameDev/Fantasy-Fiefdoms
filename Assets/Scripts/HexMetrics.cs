@@ -55,7 +55,10 @@ public static class HexMetrics
         {
             angle += 30f;
         }
-        Vector3 corner = new Vector3(hexSize * Mathf.Cos(angle * Mathf.Deg2Rad), 0f, hexSize * Mathf.Sin(angle * Mathf.Deg2Rad));
+        Vector3 corner = new Vector3(hexSize * Mathf.Cos(angle * Mathf.Deg2Rad), 
+            0f, 
+            hexSize * Mathf.Sin(angle * Mathf.Deg2Rad)
+            );
         return corner;
     }
 

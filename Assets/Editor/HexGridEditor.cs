@@ -7,7 +7,7 @@ public class HexGridEditor : Editor
     void OnSceneGUI()
     {
         HexGrid hexGrid = (HexGrid)target;
-
+        /*
         for (int z = 0; z < hexGrid.Height; z++)
         {
             for (int x = 0; x < hexGrid.Width; x++)
@@ -21,6 +21,6 @@ public class HexGridEditor : Editor
                 Handles.Label(centrePosition + Vector3.forward*0.5f, $"[{centerX}, {centerZ}]");
                 Handles.Label(centrePosition, $"({cubeCoord.x}, {cubeCoord.y}, {cubeCoord.z})");
             }
-        }
+        }*/
     }
 }
