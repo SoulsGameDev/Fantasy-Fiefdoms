@@ -21,12 +21,12 @@ public class HexGridMeshGenerator : MonoBehaviour
 
     private void OnEnable()
     {
-        MouseController.Instance.OnLeftMouseClick += OnLeftMouseClick;
+        MouseController.instance.OnLeftMouseClick += OnLeftMouseClick;
     }
 
     private void OnDisable()
     {
-        MouseController.Instance.OnLeftMouseClick -= OnLeftMouseClick;
+        MouseController.instance.OnLeftMouseClick -= OnLeftMouseClick;
     }
 
 
