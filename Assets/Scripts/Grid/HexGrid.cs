@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,13 +13,19 @@ public class HexGrid : MonoBehaviour
     [SerializeField] private List<HexCell> cells = new List<HexCell>();
     //TODO: Methods to get, change, add , and remove tiles
 
+    
+    public event System.Action OnGenerationComplete;
+
     private void Start()
     {
-        GenerateHexCells();
+        StartCoroutine(GenerateHexCells());
     }
 
-    private void GenerateHexCells()
+    private IEnumerator GenerateHexCells()
     {
+        float targetFrameTime = 1f / 60f; // Approximately 0.01667 seconds for 60fps
+        float accumulatedTime = 0f;
+
         for (int z = 0; z < Height; z++)
         {
             for (int x = 0; x < Width; x++)
@@ -31,8 +38,19 @@ public class HexGrid : MonoBehaviour
                 //Temporary until we have a proper terrain generation system
                 cell.SetTerrainType(ResourceManager.Instance.TerrainTypes[Random.Range(0,ResourceManager.Instance.TerrainTypes.Count)]);
                 cells.Add(cell);
+
+                accumulatedTime += Time.deltaTime;
+
+                if (accumulatedTime >= targetFrameTime)
+                {
+                    yield return null; // Wait for the next frame
+                    accumulatedTime = 0f; // Reset the accumulated time
+                }
             }
         }
+
+        // Trigger the event after the generation is complete
+        OnGenerationComplete?.Invoke();
     }
 
     private void OnDrawGizmos()

@@ -409,6 +409,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TerrainTypes:
   - {fileID: 11400000, guid: d65310cd317b68446954ad6f3cb9f24c, type: 2}
+  - {fileID: 11400000, guid: 32ce5c31b37d8bc47bb3973f4962c215, type: 2}
+  - {fileID: 11400000, guid: 58068fb5ef67b8b4eaaef528357bf712, type: 2}
 --- !u!4 &1889799290
 Transform:
   m_ObjectHideFlags: 0
@@ -454,8 +456,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Orientation>k__BackingField: 0
-  <Width>k__BackingField: 5
-  <Height>k__BackingField: 5
+  <Width>k__BackingField: 200
+  <Height>k__BackingField: 200
   <HexSize>k__BackingField: 2.96
   cells: []
 --- !u!4 &2119458583
