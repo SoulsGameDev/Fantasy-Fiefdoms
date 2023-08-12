@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -10,13 +11,31 @@ public class HexGrid : MonoBehaviour
     [field:SerializeField] public int Width { get; private set; }
     [field:SerializeField] public int Height { get; private set; }
     [field:SerializeField] public float HexSize { get; private set; }
-    [field:SerializeField] public GameObject HexPrefab { get; private set; }
 
-    //TODO: Create a grid of hexes
-
-    //TODO: Store the individual tiles in an array
+    [SerializeField] private List<HexCell> cells = new List<HexCell>();
     //TODO: Methods to get, change, add , and remove tiles
 
+    private void Start()
+    {
+        GenerateHexCells();
+    }
+
+    private void GenerateHexCells()
+    {
+        for (int z = 0; z < Height; z++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                Vector3 centrePosition = HexMetrics.Center(HexSize, x, z, Orientation) + transform.position;
+                HexCell cell = new HexCell();
+                cell.SetCoordinates(new Vector2(x, z), Orientation);
+                cell.Grid = this;
+                cell.HexSize = HexSize;
+                cell.CreateTerrain();
+                cells.Add(cell);
+            }
+        }
+    }
 
     private void OnDrawGizmos()
     {
