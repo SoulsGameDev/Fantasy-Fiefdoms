@@ -16,6 +16,14 @@ public class MouseController : Singleton<MouseController>
         {
             CheckMouseClick(0);
         }
+        if (Input.GetMouseButtonDown(1))
+        {
+            CheckMouseClick(1);
+        }
+        if (Input.GetMouseButtonDown(2))
+        {
+            CheckMouseClick(2);
+        }
     }
 
     void CheckMouseClick(int mouseButton)

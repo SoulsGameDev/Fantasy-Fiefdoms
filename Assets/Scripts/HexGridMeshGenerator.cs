@@ -9,6 +9,7 @@ public class HexGridMeshGenerator : MonoBehaviour
 {
     [field: SerializeField] public LayerMask gridLayer { get; private set; }
     [field:SerializeField] public HexGrid hexGrid { get; private set; }
+    public Transform explosionTest;
 
 
     private void Awake()
@@ -22,11 +23,13 @@ public class HexGridMeshGenerator : MonoBehaviour
     private void OnEnable()
     {
         MouseController.instance.OnLeftMouseClick += OnLeftMouseClick;
+        MouseController.instance.OnRightMouseClick += OnRightMouseClick;
     }
 
     private void OnDisable()
     {
         MouseController.instance.OnLeftMouseClick -= OnLeftMouseClick;
+        MouseController.instance.OnRightMouseClick -= OnRightMouseClick;
     }
 
 
@@ -126,6 +129,17 @@ public class HexGridMeshGenerator : MonoBehaviour
         float localZ = hit.point.z - hit.transform.position.z;
         //Debug.Log("Hex position: " + HexMetrics.CoordinateToAxial(localX, localZ, grid.HexSize, grid.Orientation));
         Debug.Log("Offset Position: " + HexMetrics.CoordinateToOffset(localX, localZ, hexGrid.HexSize, hexGrid.Orientation));
+    }
+
+    private void OnRightMouseClick(RaycastHit hit)
+    {
+        float localX = hit.point.x - hit.transform.position.x;
+        float localZ = hit.point.z - hit.transform.position.z;
+        
+        Vector2 location = HexMetrics.CoordinateToOffset(localX, localZ, hexGrid.HexSize, hexGrid.Orientation);
+        Vector3 center = HexMetrics.Center(hexGrid.HexSize, (int)location.x, (int)location.y, hexGrid.Orientation);
+        Debug.Log("Right Clicked on Hex: " + location);
+        Instantiate(explosionTest, center, Quaternion.identity);
     }
 
 }
