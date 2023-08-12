@@ -41,7 +41,7 @@ public class HexCell
     public void SetTerrainType(TerrainType terrainType)
     {
         TerrainType = terrainType;
-        CreateTerrain();
+        //CreateTerrain();
     }
 
     public void CreateTerrain()

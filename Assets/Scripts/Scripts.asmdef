@@ -2,6 +2,7 @@
     "name": "Scripts",
     "rootNamespace": "",
     "references": [
+        "Unity.TextMeshPro",
         ""
     ],
     "includePlatforms": [],
