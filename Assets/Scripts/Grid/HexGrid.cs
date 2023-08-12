@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class HexGrid : MonoBehaviour
@@ -31,7 +28,8 @@ public class HexGrid : MonoBehaviour
                 cell.SetCoordinates(new Vector2(x, z), Orientation);
                 cell.Grid = this;
                 cell.HexSize = HexSize;
-                cell.CreateTerrain();
+                //Temporary until we have a proper terrain generation system
+                cell.SetTerrainType(ResourceManager.Instance.TerrainTypes[Random.Range(0,ResourceManager.Instance.TerrainTypes.Count)]);
                 cells.Add(cell);
             }
         }
