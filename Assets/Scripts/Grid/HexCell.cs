@@ -7,27 +7,24 @@ using UnityEngine;
 public class HexCell
 {
     [Header("Cell Properties")]
-    private HexOrientation orientation;
+    [SerializeField]private HexOrientation orientation;
+    [field:SerializeField] public HexGrid Grid { get; set; }
+    [field:SerializeField] public float HexSize { get; set; }
     [field:SerializeField] public TerrainType TerrainType { get; private set; }
     [field:SerializeField] public Vector2 OffsetCoordinates { get; set; }
     [field:SerializeField] public Vector3 CubeCoordinates { get; private set; }
     [field:SerializeField] public Vector2 AxialCoordinates { get; private set; }
     [field:NonSerialized]public List<HexCell> Neighbours { get; private set; }
-    [field:SerializeField] public HexGrid Grid { get; set; }
-    [field:SerializeField] public float HexSize { get; set; }
-
 
     [Header("Interaction Properties")]
-    [SerializeField] public bool IsSelected;
-    [SerializeField] public bool IsHighlighted;
-    [SerializeField] public bool IsExplored;
-    [field:SerializeField] public bool IsVisible { get; private set; }
-    [field:SerializeField] public bool IsPath { get; private set; }
-    [field:SerializeField] public bool IsOccupied { get; private set; }
-    [field:SerializeField] public bool IsSelectable { get; private set; }
+    [SerializeField]
+    private HexCellInteractionState interactionState = new HexCellInteractionState();
+    public HexCellInteractionState InteractionState {
+        get { return interactionState; }
+        private set { interactionState = value; }
+    }
 
-
-    [field:SerializeField] public Transform terrain { get; private set; }
+    [field:SerializeField] private Transform terrain { get; private set; }
 
 
     public void SetCoordinates(Vector2 offsetCoordinates, HexOrientation orientation)
@@ -36,12 +33,12 @@ public class HexCell
         OffsetCoordinates = offsetCoordinates;
         CubeCoordinates = HexMetrics.OffsetToCube(offsetCoordinates, orientation);
         AxialCoordinates = HexMetrics.CubeToAxial(CubeCoordinates);
+
     }
 
     public void SetTerrainType(TerrainType terrainType)
     {
         TerrainType = terrainType;
-        //CreateTerrain();
     }
 
     public void CreateTerrain()
@@ -67,14 +64,25 @@ public class HexCell
             return;
         }
 
-        Vector3 centrePosition = HexMetrics.Center(HexSize, (int)OffsetCoordinates.x, (int)OffsetCoordinates.y, orientation) + Grid.transform.position;
-        terrain = UnityEngine.Object.Instantiate(TerrainType.Prefab, centrePosition, Quaternion.identity, Grid.transform);
+        Vector3 centrePosition = HexMetrics.Center(
+            HexSize, 
+            (int)OffsetCoordinates.x, 
+            (int)OffsetCoordinates.y, orientation
+            ) + Grid.transform.position;
+        terrain = UnityEngine.Object.Instantiate(
+            TerrainType.Prefab, 
+            centrePosition, 
+            Quaternion.identity, 
+            Grid.transform
+            );
         terrain.gameObject.layer = LayerMask.NameToLayer("Grid");
 
-        //Temporary Scale Setting for Sphere
-        float innerRadius = HexMetrics.InnerRadius(HexSize)*2;
-        terrain.localScale = new Vector3(innerRadius, innerRadius, innerRadius);
-        terrain.gameObject.GetComponent<MeshRenderer>().material.color = TerrainType.Colour;
+        //TODO: Adjust the size of the prefab to the size of the grid cell
+        
+        if(orientation == HexOrientation.FlatTop)
+        {
+            terrain.Rotate(new Vector3(0, 30, 0));
+        }
     }
 
 
