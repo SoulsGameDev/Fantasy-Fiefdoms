@@ -24,7 +24,7 @@ public class HexCell
         private set { interactionState = value; }
     }
 
-    [field:SerializeField] private Transform terrain { get; private set; }
+    [field: SerializeField] private Transform terrain;
 
 
     public void SetCoordinates(Vector2 offsetCoordinates, HexOrientation orientation)
