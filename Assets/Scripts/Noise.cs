@@ -32,6 +32,10 @@ public static class Noise
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
 
+        // Move the center of the map to the center of the game object (where noise starts from)
+        float halfWidth = mapWidth / 2f;
+        float halfHeight = mapHeight / 2f;
+
         float[,] noiseMap = new float[mapWidth, mapHeight];
         for (int y = 0; y < mapHeight; y++)
         {
@@ -49,8 +53,8 @@ public static class Noise
                     // We multiply the x and y coordinates by the scale to make the noise more pronounced (the higher the scale, the more zoomed in the noise will be)
                     // We also multiply by the frequency to make the noise scale with each octave (the higher the frequency, the more zoomed out the noise will be)
                     // We add the octave offset to make the noise different for each octave
-                    float sampleX = x / scale * frequency + octaveOffsets[i].x;
-                    float sampleY = y / scale * frequency + octaveOffsets[i].y;
+                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[i].x;
+                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
 
                     // PerlinNoise returns a value between 0 and 1, so we multiply by 2 and subtract 1 to get a value between -1 and 1
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
