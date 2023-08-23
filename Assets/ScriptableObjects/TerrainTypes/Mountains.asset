@@ -16,5 +16,6 @@ MonoBehaviour:
   <Name>k__BackingField: Mountains
   <Description>k__BackingField: These are high!
   <Colour>k__BackingField: {r: 0.31621575, g: 0.3326334, b: 0.3584906, a: 1}
-  <Prefab>k__BackingField: {fileID: 0}
+  <Prefab>k__BackingField: {fileID: 6323790754560487331, guid: 205947b468b706a449170ed6cd217f35,
+    type: 3}
   <Icon>k__BackingField: {fileID: 0}

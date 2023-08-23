@@ -16,5 +16,6 @@ MonoBehaviour:
   <Name>k__BackingField: Beach
   <Description>k__BackingField: Sandy beaches.
   <Colour>k__BackingField: {r: 0.8301887, g: 0.74840796, b: 0.54432184, a: 1}
-  <Prefab>k__BackingField: {fileID: 0}
+  <Prefab>k__BackingField: {fileID: 5350298809700390065, guid: 1d4b3d85e4abccf4d9c8ed6ac0e849fd,
+    type: 3}
   <Icon>k__BackingField: {fileID: 0}

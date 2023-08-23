@@ -16,5 +16,6 @@ MonoBehaviour:
   <Name>k__BackingField: Ice
   <Description>k__BackingField: Icy caps of the mountins
   <Colour>k__BackingField: {r: 0.79886085, g: 0.85991997, b: 0.9056604, a: 1}
-  <Prefab>k__BackingField: {fileID: 0}
+  <Prefab>k__BackingField: {fileID: 7047173637550029904, guid: e340a61c4976f1646bef811b681bc0c9,
+    type: 3}
   <Icon>k__BackingField: {fileID: 0}
