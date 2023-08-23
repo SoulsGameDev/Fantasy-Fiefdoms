@@ -315,7 +315,7 @@ Transform:
   m_GameObject: {fileID: 1157473929}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_LocalScale: {x: 128, y: 1, z: 128}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -366,13 +366,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hexGrid: {fileID: 1657913340}
-  NoiseScale: 20.61
-  Octaves: 4
-  Persistance: 0.5
+  drawMode: 1
+  Width: 128
+  Height: 128
+  NoiseScale: 50
+  Octaves: 5
+  Persistance: 0.514
   Lacunarity: 2
-  Seed: 59
-  Offset: {x: 0, y: 0}
+  Seed: 63
+  Offset: {x: -26.64, y: 0}
   AutoUpdate: 1
+  UseHexGrid: 1
+  Biomes:
+  - Height: 0.43
+    TerrainType: {fileID: 11400000, guid: 58068fb5ef67b8b4eaaef528357bf712, type: 2}
+  - Height: 0.46
+    TerrainType: {fileID: 11400000, guid: ea61aa3eb36d42e4bb8c5a3ad8c5cdb7, type: 2}
+  - Height: 0.6
+    TerrainType: {fileID: 11400000, guid: d65310cd317b68446954ad6f3cb9f24c, type: 2}
+  - Height: 0.8
+    TerrainType: {fileID: 11400000, guid: 32ce5c31b37d8bc47bb3973f4962c215, type: 2}
+  - Height: 0.95
+    TerrainType: {fileID: 11400000, guid: e473066373e3b0a46b7a03b59609e252, type: 2}
+  - Height: 1
+    TerrainType: {fileID: 11400000, guid: ec0d13fa177c93a4a9e16a3546d5ea31, type: 2}
 --- !u!114 &1657913340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,9 +403,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Orientation>k__BackingField: 0
-  <Width>k__BackingField: 100
-  <Height>k__BackingField: 100
-  <HexSize>k__BackingField: 1
+  <Width>k__BackingField: 128
+  <Height>k__BackingField: 128
+  <HexSize>k__BackingField: 30
   <BatchSize>k__BackingField: 0
   cells: []
 --- !u!4 &1657913341
