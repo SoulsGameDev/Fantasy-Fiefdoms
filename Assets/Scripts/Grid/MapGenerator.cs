@@ -1,6 +1,8 @@
 using Codice.Client.BaseCommands.Changelist;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,55 +35,98 @@ public class MapGenerator: MonoBehaviour
     public bool AutoUpdate = true;
     [Tooltip("Whether or not to use the hex grid width and height information to generate the noise map.")]
     public bool UseHexGrid = true;
+    [Tooltip("Whether or not to generate the noise map on start.")]
+    public bool GenerateMapOnStart = true;
 
     public List<TerrainHeight> Biomes = new List<TerrainHeight>();
+
+    public event Action<float[,]> OnNoiseMapGenerated;
+    public event Action<TerrainType[,]> OnTerrainMapGenerated;
+    public event Action<Color[]> OnColorMapGenerated;
+
+    MapDisplay mapDisplay;
 
     private void Awake()
     {
         hexGrid = GetComponent<HexGrid>();
+        mapDisplay = FindObjectOfType<MapDisplay>();
+    }
+
+    private void Start()
+    {
+        if (GenerateMapOnStart)
+        {
+            GenerateMap();
+        }
     }
 
     public void GenerateMap()
     {
-        if(UseHexGrid && (hexGrid != null))
+        if (UseHexGrid && (hexGrid != null))
         {
             Width = hexGrid.Width;
             Height = hexGrid.Height;
         }
 
-        ValidateSettings();
-
-        float[,] noiseMap = Noise.GenerateNoiseMap(Width, Height, NoiseScale, Seed,  Octaves, Persistance, Lacunarity, Offset);
-        Color[] colorMap = new Color[Width * Height];
-        for(int y = 0; y < Height; y++)
+        if (mapDisplay == null && (drawMode == DrawMode.NoiseMap || drawMode == DrawMode.ColourMap))
         {
-            for(int x = 0; x < Width; x++)
+            mapDisplay = FindObjectOfType<MapDisplay>();
+            if (mapDisplay == null && (drawMode == DrawMode.NoiseMap || drawMode == DrawMode.ColourMap))
             {
-                float currentHeight = noiseMap[x, y];
-                for(int i = 0; i < Biomes.Count; i++)
-                {
-                    if(currentHeight <= Biomes[i].Height)
-                    {
-                        colorMap[y * Width + x] = Biomes[i].TerrainType.Colour;
-                        break;
-                    }
-                }
+                throw new System.Exception("No Map Display found. Please add a Map Display to the scene when using NoiseMap or ColourMap draw mode.");
             }
         }
 
+        ValidateSettings();
 
-        MapDisplay mapDisplay = FindObjectOfType<MapDisplay>();
- 
-        if (drawMode == DrawMode.NoiseMap)
+        StartCoroutine(GenerateMapCoroutine());
+    }
+
+    private IEnumerator GenerateMapCoroutine()
+    {
+        float[,] noiseMap = null;
+        TerrainType[,] terrainMap = null;
+        Color[] colorMap = null;
+
+        Task task =  Task.Run(() =>
+        {
+            noiseMap = Noise.GenerateNoiseMap(Width, Height, NoiseScale, Seed, Octaves, Persistance, Lacunarity, Offset);
+            if (drawMode != DrawMode.NoiseMap)
+            {
+                terrainMap = AssignTerrainTypes(noiseMap);
+                if (drawMode == DrawMode.ColourMap)
+                {
+                    colorMap = GenerateColorsFromTerrain(terrainMap);
+                }
+            }
+        }).ContinueWith(task =>
+        {
+            // Handle exceptions if any
+            if (task.Exception != null)
+            {
+                Debug.LogError(task.Exception);
+            }
+        });
+
+        while (!task.IsCompleted)
+        {
+            Debug.Log("Generating Map");
+            yield return null;
+        }
+
+        if(drawMode == DrawMode.NoiseMap)
+        {
+            OnNoiseMapGenerated?.Invoke(noiseMap);
             mapDisplay.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
-        else if(drawMode == DrawMode.ColourMap)
+        }
+        else if (drawMode == DrawMode.ColourMap)
+        {
+            OnColorMapGenerated?.Invoke(colorMap);
             mapDisplay.DrawTexture(TextureGenerator.TextureFromColourMap(colorMap, Width, Height));
-        else if(drawMode == DrawMode.Mesh)
-            //mapDisplay.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap), TextureGenerator.TextureFromColourMap(colorMap, Width, Height));
-            Debug.Log("Draw Mesh");
-        else if(drawMode == DrawMode.Models)
-            //mapDisplay.DrawModels(MeshGenerator.GenerateTerrainMesh(noiseMap), TextureGenerator.TextureFromColourMap(colorMap, Width, Height));
-            Debug.Log("Draw Models");
+        }
+        OnTerrainMapGenerated?.Invoke(terrainMap);
+
+        yield return null;
     }
 
     private void ValidateSettings()
@@ -98,6 +143,45 @@ public class MapGenerator: MonoBehaviour
 
         Width = Mathf.Max(Width, 1);
         Height = Mathf.Max(Height, 1);
+    }
+
+    // Assigns a terrain type to each point on the noise map based on the height of the point as compared to the height of the biomes
+    private TerrainType[,] AssignTerrainTypes(float[,] noiseMap)
+    {
+        TerrainType[,] terrainMap = new TerrainType[Width, Height];
+
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                float currentHeight = noiseMap[x, y];
+                for (int i = 0; i < Biomes.Count; i++)
+                {
+                    if (currentHeight <= Biomes[i].Height)
+                    {
+                        terrainMap[x,y] = Biomes[i].TerrainType;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return terrainMap;
+    }
+
+    // Generates a color map from the terrain map by getting the color of each terrain type
+    private Color[] GenerateColorsFromTerrain(TerrainType[,] terrainMap)
+    {
+        Color[] colorMap = new Color[Width * Height];
+
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                colorMap[y * Width + x] = terrainMap[x,y].Colour;
+            }
+        }
+        return colorMap;
     }
 
     private void OnValidate()

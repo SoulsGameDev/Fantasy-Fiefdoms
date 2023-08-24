@@ -69,8 +69,9 @@ public class HexCell
             (int)OffsetCoordinates.x, 
             (int)OffsetCoordinates.y, orientation
             ) + Grid.transform.position;
+
         terrain = UnityEngine.Object.Instantiate(
-            TerrainType.Prefab, 
+            TerrainType.Prefab,
             centrePosition, 
             Quaternion.identity, 
             Grid.transform
@@ -91,5 +92,12 @@ public class HexCell
         Neighbours = neighbours;
     }
 
+    public void ClearTerrain()
+    {
+        if(terrain != null)
+        {
+            UnityEngine.Object.Destroy(terrain.gameObject);
+        }
+    }
 
 }

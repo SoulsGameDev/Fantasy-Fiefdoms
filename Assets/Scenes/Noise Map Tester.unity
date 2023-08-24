@@ -187,6 +187,101 @@ LightingSettings:
   m_PVRTiledBaking: 0
   m_NumRaysToShootPerTexel: -1
   m_RespectSceneVisibilityWhenBakingGI: 0
+--- !u!1 &507525403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 507525405}
+  - component: {fileID: 507525404}
+  m_Layer: 0
+  m_Name: Resource Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &507525404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507525403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22484e45fb82708469f5bd9eb88a7891, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TerrainTypes:
+  - {fileID: 11400000, guid: ea61aa3eb36d42e4bb8c5a3ad8c5cdb7, type: 2}
+  - {fileID: 11400000, guid: 32ce5c31b37d8bc47bb3973f4962c215, type: 2}
+  - {fileID: 11400000, guid: d65310cd317b68446954ad6f3cb9f24c, type: 2}
+  - {fileID: 11400000, guid: ec0d13fa177c93a4a9e16a3546d5ea31, type: 2}
+  - {fileID: 11400000, guid: e473066373e3b0a46b7a03b59609e252, type: 2}
+  - {fileID: 11400000, guid: 58068fb5ef67b8b4eaaef528357bf712, type: 2}
+--- !u!4 &507525405
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507525403}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &973060159
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973060161}
+  - component: {fileID: 973060160}
+  m_Layer: 0
+  m_Name: MainThreadDispatcher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &973060160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973060159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f57ed20a26ea0c14cbe3a480754b8796, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &973060161
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973060159}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1133076147
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +474,7 @@ Transform:
   m_GameObject: {fileID: 1157473929}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 128, y: 1, z: 128}
+  m_LocalScale: {x: 64, y: 1, z: 64}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -431,9 +526,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hexGrid: {fileID: 1657913340}
   drawMode: 1
-  Width: 128
-  Height: 128
-  NoiseScale: 50
+  Width: 64
+  Height: 64
+  NoiseScale: 44.9
   Octaves: 5
   Persistance: 0.514
   Lacunarity: 2
@@ -441,6 +536,7 @@ MonoBehaviour:
   Offset: {x: -26.64, y: 0}
   AutoUpdate: 1
   UseHexGrid: 1
+  GenerateMapOnStart: 1
   Biomes:
   - Height: 0.43
     TerrainType: {fileID: 11400000, guid: 58068fb5ef67b8b4eaaef528357bf712, type: 2}
@@ -467,10 +563,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Orientation>k__BackingField: 0
-  <Width>k__BackingField: 128
-  <Height>k__BackingField: 128
+  <Width>k__BackingField: 64
+  <Height>k__BackingField: 64
   <HexSize>k__BackingField: 30
-  <BatchSize>k__BackingField: 0
+  <BatchSize>k__BackingField: 500
   cells: []
 --- !u!4 &1657913341
 Transform:

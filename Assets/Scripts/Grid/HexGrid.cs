@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
+using System;
 
 public class HexGrid : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class HexGrid : MonoBehaviour
     [field:SerializeField] public int BatchSize { get; private set; }
 
     [SerializeField] private List<HexCell> cells = new List<HexCell>();
+    private MapGenerator mapGenerator;
 
     private Task<List<HexCell>> hexGenerationTask;
     //TODO: Methods to get, change, add , and remove hexes
@@ -30,44 +32,71 @@ public class HexGrid : MonoBehaviour
     private void Awake()
     {
         gridOrigin = transform.position;
+        mapGenerator = FindObjectOfType<MapGenerator>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        hexGenerationTask = Task.Run(() => GenerateHexCellData());
-    }
-
-    private void Update()
-    {
-        if (hexGenerationTask != null && hexGenerationTask.IsCompleted)
+        if(mapGenerator != null)
         {
-            cells = hexGenerationTask.Result;
-            OnMapInfoGenerated?.Invoke();
-            StartCoroutine(InstantiateCells());
-            hexGenerationTask = null; // Clear the task
+            mapGenerator.OnTerrainMapGenerated += SetHexCellTerrainTypes;
         }
     }
 
+    private void OnDisable()
+    {
+        if (mapGenerator != null)
+        {
+            mapGenerator.OnTerrainMapGenerated -= SetHexCellTerrainTypes;
+        }
+        if (hexGenerationTask != null && hexGenerationTask.Status == TaskStatus.Running)
+        {
+            hexGenerationTask.Dispose();
+        }
+    }
+
+    private void SetHexCellTerrainTypes(TerrainType[,] terrainMap)
+    {
+        Debug.Log("Setting Hex Cell Terrain Types");
+        ClearHexCells();
+        hexGenerationTask = Task.Run(() => GenerateHexCellData(terrainMap));
+        hexGenerationTask.ContinueWith(task =>
+        {
+            Debug.Log("Hex Cell Data Generated");
+            cells = task.Result;
+            MainThreadDispatcher.Instance.Enqueue(() => StartCoroutine(InstantiateCells(cells)));
+        });
+    }
+
+    private void ClearHexCells()
+    {
+        for (int i = 0; i < cells.Count; i++)
+        {
+            cells[i].ClearTerrain();
+        }
+        cells.Clear();
+    }
+    
     //This will become map generation
     //No Unity API allowed - including lloking up transform data, Instantiation, etc.
-    private List<HexCell> GenerateHexCellData()
+    private List<HexCell> GenerateHexCellData(TerrainType[,] terrainMap)
     {
-        System.Random rng = new System.Random();
+        Debug.Log("Generating Hex Cell Data");
         List<HexCell> hexCells = new List<HexCell>();
 
-        for (int z = 0; z < Height; z++)
+        for (int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
             {
-                Vector3 centrePosition = HexMetrics.Center(HexSize, x, z, Orientation) + gridOrigin;
+                int flippedX = Width - x - 1;
+                int flippedY = Height - y - 1;
+
+                //Vector3 centrePosition = HexMetrics.Center(HexSize, x, -y, Orientation) + gridOrigin;
                 HexCell cell = new HexCell();
-                cell.SetCoordinates(new Vector2(x, z), Orientation);
+                cell.SetCoordinates(new Vector2(x, y), Orientation);
                 cell.Grid = this;
                 cell.HexSize = HexSize;
-                //Temporary until we have a proper terrain generation system
-                int randomTerrainTypeIndex = rng.Next(0, ResourceManager.Instance.TerrainTypes.Count);
-                TerrainType terrain = ResourceManager.Instance.TerrainTypes[randomTerrainTypeIndex];
-                cell.SetTerrainType(terrain);
+                cell.SetTerrainType(terrainMap[flippedX, flippedY]);
                 hexCells.Add(cell);
             }
         }
@@ -76,15 +105,16 @@ public class HexGrid : MonoBehaviour
     }
 
     //Handled by coroutine and currently the most expensive operation
-    private IEnumerator InstantiateCells()
+    private IEnumerator InstantiateCells(List<HexCell> hexCells)
     {
+        Debug.Log("Instantiating Hex Cells");
         int batchCount = 0;
-        int totalBatches = Mathf.CeilToInt(cells.Count / BatchSize);
+        int totalBatches = Mathf.CeilToInt(hexCells.Count / BatchSize);
         for (int i = 0; i < cells.Count; i++)
         {
             cells[i].CreateTerrain();
             // Yield every batchSize hex cells
-            if (i % BatchSize == 0) 
+            if (i % BatchSize == 0 && i != 0) 
             {
                 batchCount++;
                 OnCellBatchGenerated?.Invoke((float)batchCount / totalBatches);
@@ -94,6 +124,7 @@ public class HexGrid : MonoBehaviour
 
         OnCellInstancesGenerated?.Invoke();
     }
+    
 
     private void OnDrawGizmos()
     {
