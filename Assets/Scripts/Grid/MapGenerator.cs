@@ -9,10 +9,7 @@ using UnityEngine.UIElements;
 
 public class MapGenerator: MonoBehaviour
 {
-    public enum DrawMode { NoiseMap, ColourMap, Mesh, Models };
-
     public HexGrid hexGrid;
-    public DrawMode drawMode;
     
     public int Width = 256;
     public int Height = 256;
@@ -40,16 +37,19 @@ public class MapGenerator: MonoBehaviour
 
     public List<TerrainHeight> Biomes = new List<TerrainHeight>();
 
+    //Latest generated maps
+    public float[,] noiseMap { get; private set; }
+    public TerrainType[,] terrainMap { get; private set; }
+    public Color[] colorMap { get; private set; }
+
+    //Events
     public event Action<float[,]> OnNoiseMapGenerated;
     public event Action<TerrainType[,]> OnTerrainMapGenerated;
-    public event Action<Color[]> OnColorMapGenerated;
-
-    MapDisplay mapDisplay;
+    public event Action<Color[], int, int> OnColorMapGenerated;
 
     private void Awake()
     {
         hexGrid = GetComponent<HexGrid>();
-        mapDisplay = FindObjectOfType<MapDisplay>();
     }
 
     private void Start()
@@ -68,15 +68,6 @@ public class MapGenerator: MonoBehaviour
             Height = hexGrid.Height;
         }
 
-        if (mapDisplay == null && (drawMode == DrawMode.NoiseMap || drawMode == DrawMode.ColourMap))
-        {
-            mapDisplay = FindObjectOfType<MapDisplay>();
-            if (mapDisplay == null && (drawMode == DrawMode.NoiseMap || drawMode == DrawMode.ColourMap))
-            {
-                throw new System.Exception("No Map Display found. Please add a Map Display to the scene when using NoiseMap or ColourMap draw mode.");
-            }
-        }
-
         ValidateSettings();
 
         StartCoroutine(GenerateMapCoroutine());
@@ -84,46 +75,45 @@ public class MapGenerator: MonoBehaviour
 
     private IEnumerator GenerateMapCoroutine()
     {
-        float[,] noiseMap = null;
-        TerrainType[,] terrainMap = null;
-        Color[] colorMap = null;
+        // Clear the current maps
+        noiseMap = null;
+        terrainMap = null;
+        colorMap = null;
 
-        Task task =  Task.Run(() =>
+        // If we are in play mode, we generate the noise map on a separate thread
+        if(Application.isPlaying)
+        {
+            Task task =  Task.Run(() =>
+            {
+                noiseMap = Noise.GenerateNoiseMap(Width, Height, NoiseScale, Seed, Octaves, Persistance, Lacunarity, Offset);
+                terrainMap = AssignTerrainTypes(noiseMap);
+                colorMap = GenerateColorsFromTerrain(terrainMap);
+
+            }).ContinueWith(task =>
+            {
+                // Handle exceptions if any
+                if (task.Exception != null)
+                {
+                    Debug.LogError(task.Exception);
+                }
+            });
+
+            while (!task.IsCompleted)
+            {
+                yield return null;
+            }
+        }
+        // If we are not in play mode, we generate the noise map on the main thread
+        // In testing I found that threading is much slower in the editor than in a build or play mode
+        else
         {
             noiseMap = Noise.GenerateNoiseMap(Width, Height, NoiseScale, Seed, Octaves, Persistance, Lacunarity, Offset);
-            if (drawMode != DrawMode.NoiseMap)
-            {
-                terrainMap = AssignTerrainTypes(noiseMap);
-                if (drawMode == DrawMode.ColourMap)
-                {
-                    colorMap = GenerateColorsFromTerrain(terrainMap);
-                }
-            }
-        }).ContinueWith(task =>
-        {
-            // Handle exceptions if any
-            if (task.Exception != null)
-            {
-                Debug.LogError(task.Exception);
-            }
-        });
-
-        while (!task.IsCompleted)
-        {
-            Debug.Log("Generating Map");
-            yield return null;
+            terrainMap = AssignTerrainTypes(noiseMap);
+            colorMap = GenerateColorsFromTerrain(terrainMap);
         }
-
-        if(drawMode == DrawMode.NoiseMap)
-        {
-            OnNoiseMapGenerated?.Invoke(noiseMap);
-            mapDisplay.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
-        }
-        else if (drawMode == DrawMode.ColourMap)
-        {
-            OnColorMapGenerated?.Invoke(colorMap);
-            mapDisplay.DrawTexture(TextureGenerator.TextureFromColourMap(colorMap, Width, Height));
-        }
+        //We invoke separate events for each map generated so that the parts of code that interested only in one map can subscribe to that event
+        OnNoiseMapGenerated?.Invoke(noiseMap);
+        OnColorMapGenerated?.Invoke(colorMap, Width, Height);
         OnTerrainMapGenerated?.Invoke(terrainMap);
 
         yield return null;

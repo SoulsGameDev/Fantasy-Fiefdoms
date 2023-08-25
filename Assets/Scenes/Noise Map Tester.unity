@@ -675,6 +675,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textureRenderer: {fileID: 1157473930}
+  drawMode: 1
+  mapGenerator: {fileID: 1657913339}
 --- !u!114 &1657913339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -688,12 +690,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hexGrid: {fileID: 1657913340}
-  drawMode: 1
   Width: 64
   Height: 64
   NoiseScale: 25.14
   Octaves: 4
-  Persistance: 0.706
+  Persistance: 0.658
   Lacunarity: 2
   Seed: 63
   Offset: {x: -26.64, y: 12.3}
