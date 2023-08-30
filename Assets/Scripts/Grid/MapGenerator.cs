@@ -1,11 +1,8 @@
-using Codice.Client.BaseCommands.Changelist;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEditor.AssetImporters;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class MapGenerator: MonoBehaviour
 {
@@ -34,6 +31,7 @@ public class MapGenerator: MonoBehaviour
     public bool UseHexGrid = true;
     [Tooltip("Whether or not to generate the noise map on start.")]
     public bool GenerateMapOnStart = true;
+    public bool UseThreadedGeneration = true;
 
     public List<TerrainHeight> Biomes = new List<TerrainHeight>();
 
@@ -81,7 +79,7 @@ public class MapGenerator: MonoBehaviour
         colorMap = null;
 
         // If we are in play mode, we generate the noise map on a separate thread
-        if(Application.isPlaying)
+        if(Application.isPlaying && UseThreadedGeneration)
         {
             Task task =  Task.Run(() =>
             {

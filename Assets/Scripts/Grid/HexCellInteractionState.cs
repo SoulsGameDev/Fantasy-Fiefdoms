@@ -4,13 +4,19 @@ using UnityEngine;
 [Serializable]
 public class HexCellInteractionState
 {
+    //Mose Interactions
+    [field: SerializeField] public bool IsFocused { get; set; }
     [field: SerializeField] public bool IsSelected { get; set; }
     [field: SerializeField] public bool IsHighlighted { get; set; }
     [field: SerializeField] public bool IsExplored { get; set; }
     [field: SerializeField] public bool IsVisible { get; set; }
-    [field: SerializeField] public bool IsPath { get; set; }
-    [field: SerializeField] public bool IsOccupied { get; set; }
     [field: SerializeField] public bool IsSelectable { get; set; }
+    
+    //
+    [field: SerializeField] public bool IsPath { get; set; }
+    [field: SerializeField] public bool IsWalkable{get; set;}
+    [field: SerializeField] public bool IsOccupied { get; set; }
+    
 
     //TODO: Add more states
     //TODO: Add state change events
