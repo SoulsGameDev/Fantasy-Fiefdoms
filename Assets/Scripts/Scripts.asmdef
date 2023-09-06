@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
-        ""
+        "Unity.InputSystem",
+        "Cinemachine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
