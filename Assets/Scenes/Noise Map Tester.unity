@@ -1511,7 +1511,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 15.59066
+  field of view: 57.09424
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -1667,7 +1667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: a5737c3a548a6c3428fb4a9a0231a42c,
+  m_Actions: {fileID: -944628639613478452, guid: f96a1d7f0e3909247847fd00833a396b,
     type: 3}
   m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
@@ -1695,7 +1695,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: ee7b5cef-c3ac-4ca9-8486-a4b7d02f70ef
+    m_ActionId: 531f2ddc-360d-4eba-a45b-7248dcf10715
     m_ActionName: World/Pan[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   - m_PersistentCalls:
       m_Calls:
@@ -1711,8 +1711,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: bfd5136d-5bc2-4db6-9927-bef930b94d3a
-    m_ActionName: World/Zoom[/Keyboard/q,/Keyboard/e,/Mouse/scroll/up,/Mouse/scroll/down]
+    m_ActionId: 1ba59964-28b5-4e58-b0c5-74eefaf576c4
+    m_ActionName: World/Zoom[/Keyboard/q,/Keyboard/e,/Mouse/scroll/y]
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1175574648}
@@ -1727,40 +1727,28 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: 925b7a68-a2c4-43b2-86f9-b08a3c298303
-    m_ActionName: World/Focus[/Mouse/leftButton,/Keyboard/f]
+    m_ActionId: 9845cc88-a9fa-4048-a3ee-13f22796a063
+    m_ActionName: World/Focus[/Keyboard/f]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: ddb9aaad-e55d-4e39-9f8d-02b6d342baa9
-    m_ActionName: UI/Up/Down
+    m_ActionId: e140f7df-bfae-4edf-a510-5d8885b7028b
+    m_ActionName: UI/Vertical[/Keyboard/w,/Keyboard/s]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: c17d8791-a517-4f49-8925-68e0b0ed697c
-    m_ActionName: UI/Select
+    m_ActionId: 02010f4f-cf81-4668-b9ce-f041069d8db4
+    m_ActionName: UI/Select[/Keyboard/d]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 3de4ec4e-50e5-439d-9bfb-57aed1df223e
-    m_ActionName: UI/Back
+    m_ActionId: 49e73abd-9b2b-4457-a612-5c9149e4f6e3
+    m_ActionName: UI/Back[/Keyboard/a]
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: 90334e23-52cf-4117-bef3-dc70232c1938
-    m_ActionName: UI/Exit
+    m_ActionId: f8358119-1a5c-4823-8f83-b937b675e5a6
+    m_ActionName: UI/Exit[/Keyboard/escape]
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1175574648}
-        m_TargetAssemblyTypeName: CameraController, Scripts
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 85031bcc-96c4-45ea-a661-6ac954f7aa7d
-    m_ActionName: World/MouseZoom
+      m_Calls: []
+    m_ActionId: b61db946-f6a0-49f3-a3ae-4b6c4a1ee277
+    m_ActionName: UI/Confirm[/Keyboard/enter]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard and Mouse
   m_DefaultActionMap: World
@@ -1785,7 +1773,6 @@ MonoBehaviour:
   cameraZoomMin: 5
   cameraZoomMax: 120
   cameraZoomDefault: 40
-  scrollWheelZoomSpeed: 120
 --- !u!1 &1393108954
 GameObject:
   m_ObjectHideFlags: 0
@@ -2501,7 +2488,7 @@ MonoBehaviour:
   Seed: 63
   Offset: {x: -26.64, y: 12.3}
   AutoUpdate: 1
-  UseHexGrid: 1
+  UseHexGrid: 0
   GenerateMapOnStart: 1
   UseThreadedGeneration: 0
   Biomes:
@@ -2524,7 +2511,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1657913337}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e7578315e64d4c498d7e313453985f1, type: 3}
   m_Name: 
@@ -2672,7 +2659,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 1175574646}
   m_Follow: {fileID: 1175574646}
   m_Lens:
-    FieldOfView: 15.59066
+    FieldOfView: 57.09424
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000

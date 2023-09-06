@@ -121,37 +121,4 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    public void OnCopyChanged(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            Debug.Log("Copy button pressed...");
-        }
-        else if (context.performed)
-        {
-            Debug.Log("Copy performed");
-        }
-        else if (context.canceled)
-        {
-            Debug.Log("Copy canceled");
-        }
-    }
-
-    public void OnCrouchChanged(InputAction.CallbackContext context)
-    {
-        if (context.started) 
-        {             
-            Debug.Log("Crouch button pressed...");
-        }
-        else if(context.performed)
-        {
-            Debug.Log("Crouch performed");
-        }
-        else if(context.canceled)
-        {
-            Debug.Log("Crouch canceled");
-        }
-    }
-
-
 }
