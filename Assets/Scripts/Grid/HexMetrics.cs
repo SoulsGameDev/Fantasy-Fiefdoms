@@ -50,10 +50,10 @@ public static class HexMetrics
     /// <returns></returns>
     public static Vector3 Corner(float hexSize, HexOrientation orientation, int index)
     {
-        float angle = 60f * index;
+        float angle = 60f * -index;
         if (orientation == HexOrientation.PointyTop)
         {
-            angle += 30f;
+            angle -= 30f;
         }
         Vector3 corner = new Vector3(hexSize * Mathf.Cos(angle * Mathf.Deg2Rad), 
             0f, 
