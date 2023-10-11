@@ -124,7 +124,8 @@ public class HexGrid : MonoBehaviour
 
         OnCellInstancesGenerated?.Invoke();
     }
-    
+
+    Color[] colors = new Color[] { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan };
 
     private void OnDrawGizmos()
     {
@@ -135,10 +136,13 @@ public class HexGrid : MonoBehaviour
                 Vector3 centrePosition = HexMetrics.Center(HexSize, x, z, Orientation) + transform.position;
                 for (int s = 0; s < HexMetrics.Corners(HexSize, Orientation).Length; s++)
                 {
+                    Gizmos.color = Color.white;
                     Gizmos.DrawLine(
                         centrePosition + HexMetrics.Corners(HexSize, Orientation)[s % 6], 
                         centrePosition + HexMetrics.Corners(HexSize, Orientation)[(s + 1) % 6]
                         );
+                    Gizmos.color = colors[s % 6];
+                    Gizmos.DrawSphere(centrePosition + HexMetrics.Corners(HexSize, Orientation)[s % 6], HexSize * 0.1f);
                 }
             }
         }
