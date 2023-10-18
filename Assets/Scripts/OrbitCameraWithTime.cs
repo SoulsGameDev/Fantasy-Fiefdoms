@@ -9,7 +9,7 @@ public class OrbitCameraWithTime : MonoBehaviour
     [SerializeField]
     CinemachineVirtualCamera orbitalCamera;
     CinemachineOrbitalTransposer orbitalTransposer;
-    float rotationSpeed = 10f;
+    float rotationSpeed;
 
 
     Coroutine rotationCoroutine;

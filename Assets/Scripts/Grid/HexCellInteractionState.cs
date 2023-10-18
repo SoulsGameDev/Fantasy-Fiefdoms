@@ -1,25 +1,23 @@
 using System;
 using UnityEngine;
 
+public enum CellState{
+    Invisible,
+    Visible,
+    Highlighted,
+    Selected,
+    Focused
+}
+
 [Serializable]
 public class HexCellInteractionState
 {
-    //Mose Interactions
-    [field: SerializeField] public bool IsFocused { get; set; }
-    [field: SerializeField] public bool IsSelected { get; set; }
-    [field: SerializeField] public bool IsHighlighted { get; set; }
-    [field: SerializeField] public bool IsExplored { get; set; }
-    [field: SerializeField] public bool IsVisible { get; set; }
-    [field: SerializeField] public bool IsSelectable { get; set; }
-    
-    //
-    [field: SerializeField] public bool IsPath { get; set; }
-    [field: SerializeField] public bool IsWalkable{get; set;}
-    [field: SerializeField] public bool IsOccupied { get; set; }
-    
+    public CellState State{get; private set;}
 
-    //TODO: Add more states
-    //TODO: Add state change events
-    //TODO: Add helper methods to change state
-    //TODO: Create a state machine to handle state changes if the number of states gets too large
+    public event Action<CellState> OnStateChanged;
+
+    public void SetState(CellState state){
+        State = state;
+        OnStateChanged?.Invoke(state);
+    }
 }
