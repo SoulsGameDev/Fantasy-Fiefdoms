@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5891064312789247430}
   - component: {fileID: 2459569807118997651}
   - component: {fileID: 8584607099808516524}
+  - component: {fileID: -4446561032204261687}
   m_Layer: 0
   m_Name: Grass
   m_TagString: Untagged
@@ -3629,6 +3630,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &-4446561032204261687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6462658604567163906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 102c9166f781b984cae447c69cd8c228, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &66552665782512045
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1958,8 +1958,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTarget: {fileID: 1175574645}
-  topDownCamera: {fileID: 0}
-  focusCamera: {fileID: 0}
+  topDownCamera: {fileID: 145205696}
+  focusCamera: {fileID: 403670312}
   defaultMode: 0
   currentMode: 1
   cameraSpeed: 200
