@@ -16,8 +16,6 @@ public class HexCell
     [field:SerializeField] public Vector2 AxialCoordinates { get; private set; }
     [field:NonSerialized]public List<HexCell> Neighbours { get; private set; }
 
-    private HexCellInteractionState interactionState;
-    private HexCellStateManager stateManager;
     //private PlayerInput playerInput;
 
     private Transform terrain;
@@ -26,20 +24,9 @@ public class HexCell
         // Get the PlayerInput component
        // playerInput = GetComponent<PlayerInput>();
 
-        // Initialize the state to Invisible
-        interactionState.SetState(CellState.Invisible);
 
-        // Create the state manager
-        stateManager = new HexCellStateManager(interactionState);
+    }
 
-        // Subscribe to the OnStateChanged event
-        interactionState.OnStateChanged += OnStateChanged;
-    }
-    private void OnStateChanged(CellState state)
-    {
-        // Update the appearance of the cell based on the new state
-        // ...
-    }
 
     public void SetCoordinates(Vector2 offsetCoordinates, HexOrientation orientation)
     {
