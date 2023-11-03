@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Threading.Tasks;
-using System;
+using UnityEngine;
 
 public class HexGrid : MonoBehaviour
 {
@@ -13,6 +12,8 @@ public class HexGrid : MonoBehaviour
     [field:SerializeField] public float HexSize { get; private set; }
 
     [field:SerializeField] public int BatchSize { get; private set; }
+    public List<Vector2> DefaultVisibleCells = new List<Vector2> { new Vector2(0,0)};
+    public int DefaultVisibleRadius = 1;
 
     [SerializeField] private List<HexCell> cells = new List<HexCell>();
     private MapGenerator mapGenerator;
@@ -41,6 +42,7 @@ public class HexGrid : MonoBehaviour
         {
             mapGenerator.OnTerrainMapGenerated += SetHexCellTerrainTypes;
         }
+        OnCellInstancesGenerated += SetVisibleCells;
     }
 
     private void OnDisable()
@@ -53,6 +55,7 @@ public class HexGrid : MonoBehaviour
         {
             hexGenerationTask.Dispose();
         }
+        OnCellInstancesGenerated -= SetVisibleCells;
     }
 
     private void SetHexCellTerrainTypes(TerrainType[,] terrainMap)
@@ -62,7 +65,6 @@ public class HexGrid : MonoBehaviour
         hexGenerationTask = Task.Run(() => GenerateHexCellData(terrainMap));
         hexGenerationTask.ContinueWith(task =>
         {
-            Debug.Log("Hex Cell Data Generated");
             cells = task.Result;
             MainThreadDispatcher.Instance.Enqueue(() => StartCoroutine(InstantiateCells(cells)));
         });
@@ -97,11 +99,41 @@ public class HexGrid : MonoBehaviour
                 cell.Grid = this;
                 cell.HexSize = HexSize;
                 cell.SetTerrainType(terrainMap[flippedX, flippedY]);
+                cell.InitializeState(new HiddenState());
                 hexCells.Add(cell);
             }
         }
-
+        SetNeighbours(hexCells);
         return hexCells;
+    }
+
+    public void SetNeighbours(List<HexCell> cells)
+    {
+
+        foreach (HexCell cell in cells)
+        {
+            List<HexCell> neighbours = new List<HexCell>();
+            // Get the axial coordinates of the current cell
+            Vector2 currentAxialCoordinates = cell.AxialCoordinates;
+
+            // Get the neighbor directions for the current cell
+            List<Vector2> neighborCoordinates = HexMetrics.GetNeighbourCoordinatesList(currentAxialCoordinates);
+            int neighborsFound = 0;
+            foreach (Vector2 neighbourCoordiate in neighborCoordinates)
+            {
+                // Find the neighbor cell based on the direction
+                HexCell neighbor = cells.Find(c => c.AxialCoordinates == neighbourCoordiate);
+
+                // If the neighbor exists, add it to the Neighbours list
+                if (neighbor != null)
+                {
+                    neighbours.Add(neighbor);
+                    neighborsFound++;
+                }
+            }
+            cell.SetNeighbours(neighbours);
+            Debug.Log($"Cell {cell.AxialCoordinates} has {neighborsFound} neighbours found");
+        }
     }
 
     //Handled by coroutine and currently the most expensive operation
@@ -124,6 +156,47 @@ public class HexGrid : MonoBehaviour
 
         OnCellInstancesGenerated?.Invoke();
     }
+
+    private void SetVisibleCells()
+    {
+        // Create a queue to store the cells to be processed
+        Queue<HexCell> cellQueue = new Queue<HexCell>();
+
+        // Set the visibility of the default visible cells
+        foreach (Vector2 coordinates in DefaultVisibleCells)
+        {
+            HexCell cell = cells.Find(c => c.OffsetCoordinates == coordinates);
+            if (cell != null)
+            {
+                cell.ChangeState(new VisibleState());
+                cellQueue.Enqueue(cell);
+            }
+        }
+
+        // Iterate through the neighbors and their neighbors up to the specified depth
+        int currentDepth = 0;
+        while (cellQueue.Count > 0 && currentDepth < DefaultVisibleRadius)
+        {
+            int queueSize = cellQueue.Count;
+            for (int i = 0; i < queueSize; i++)
+            {
+                HexCell currentCell = cellQueue.Dequeue();
+
+                // Iterate through the neighbors of the current cell
+                foreach (HexCell neighbor in currentCell.Neighbours)
+                {
+                    if (neighbor.State != new VisibleState())
+                    {
+                        neighbor.ChangeState(new VisibleState());
+                        cellQueue.Enqueue(neighbor);
+                    }
+                }
+            }
+
+            currentDepth++;
+        }
+    }
+
 
     Color[] colors = new Color[] { Color.red, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan };
 
