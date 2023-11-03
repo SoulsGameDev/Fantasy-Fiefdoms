@@ -7,6 +7,10 @@ public class VisibleState : BaseCellState
     public override void Enter(HexCell cell)
     {
         Debug.Log($"Cell {cell.AxialCoordinates} is entering Visible State");
+        if(cell.Terrain != null && !cell.Terrain.gameObject.activeSelf)
+        {
+            cell.Terrain.gameObject.SetActive(true);
+        }
     }
 
     public override void Exit(HexCell cell)

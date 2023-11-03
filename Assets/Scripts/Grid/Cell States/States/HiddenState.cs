@@ -7,10 +7,21 @@ public class HiddenState : BaseCellState
     public override void Enter(HexCell cell)
     {
         Debug.Log("Entering Hidden State");
+        if(cell.Terrain == null)
+        {
+            Debug.LogWarning("Terrain is null");
+            return;
+        }
+        cell.Terrain.gameObject.SetActive(false);
     }
 
     public override void Exit(HexCell cell)
     {
-        Debug.Log("Exiting Hidden State");
+        if(cell.Terrain == null)
+        {
+            Debug.LogWarning("Terrain is null");
+            return;
+        }
+        cell.Terrain.gameObject.SetActive(true);
     }
 }
