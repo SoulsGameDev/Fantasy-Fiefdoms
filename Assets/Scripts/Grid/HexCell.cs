@@ -16,14 +16,29 @@ public class HexCell
     [field:SerializeField] public Vector2 AxialCoordinates { get; private set; }
     [field:NonSerialized]public List<HexCell> Neighbours { get; private set; }
 
+    [SerializeField]
+    private CellState cellState;
+    private ICellState state;
+    public ICellState State { 
+        get { return state; } 
+        private set 
+        {
+            state = value;
+            cellState = state.State;
+        } 
+    }
+
     //private PlayerInput playerInput;
 
     private Transform terrain;
+    public Transform Terrain { get { return terrain; } }
 
-    private void Awake(){
-        // Get the PlayerInput component
-       // playerInput = GetComponent<PlayerInput>();
-
+    public void InitializeState(ICellState initalState = null)
+    {
+        if (initalState == null)
+            ChangeState(new VisibleState());
+        else
+            ChangeState(initalState);
 
     }
 
@@ -34,7 +49,6 @@ public class HexCell
         OffsetCoordinates = offsetCoordinates;
         CubeCoordinates = HexMetrics.OffsetToCube(offsetCoordinates, orientation);
         AxialCoordinates = HexMetrics.CubeToAxial(CubeCoordinates);
-
     }
 
     public void SetTerrainType(TerrainType terrainType)
@@ -88,6 +102,10 @@ public class HexCell
         //Temporary random rotation to make the terrain look more natural
         int randomRotation = UnityEngine.Random.Range(0, 6);
         terrain.Rotate(new Vector3(0, randomRotation*60, 0));
+        HexTerrain hexTerrrain = terrain.GetComponentInChildren<HexTerrain>();
+        hexTerrrain.OnMouseEnterAction += OnMouseEnter;
+        hexTerrrain.OnMouseExitAction += OnMouseExit;
+        terrain.gameObject.SetActive(false);
     }
 
 
@@ -100,8 +118,39 @@ public class HexCell
     {
         if(terrain != null)
         {
+            HexTerrain hexTerrrain = terrain.GetComponent<HexTerrain>();
+            hexTerrrain.OnMouseEnterAction -= OnMouseEnter;
+            hexTerrrain.OnMouseExitAction -= OnMouseExit;
             UnityEngine.Object.Destroy(terrain.gameObject);
         }
+    }
+
+    public void ChangeState(ICellState newState)
+    {
+        if(newState == null)
+        {
+            Debug.LogError("Trying to set null state.");
+            return;
+        }
+
+        if(State != newState)
+        {
+            //Debug.Log($"Changing state from {State} to {newState}");
+            if(State != null)
+                State.Exit(this);
+            State = newState;
+            State.Enter(this);
+        }
+    }
+
+    private void OnMouseEnter()
+    {
+        ChangeState(State.OnMouseEnter());
+    }
+
+    private void OnMouseExit()
+    {
+        ChangeState(State.OnMouseExit());
     }
 
 }

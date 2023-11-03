@@ -656,7 +656,7 @@ MonoBehaviour:
   - m_Script
   m_LockStageInInspector: 
   m_StreamingVersion: 20170927
-  m_Priority: 11
+  m_Priority: 10
   m_StandbyUpdate: 2
   m_LookAt: {fileID: 1175574646}
   m_Follow: {fileID: 1175574646}
@@ -2764,7 +2764,7 @@ MonoBehaviour:
   AutoUpdate: 1
   UseHexGrid: 1
   GenerateMapOnStart: 1
-  UseThreadedGeneration: 1
+  UseThreadedGeneration: 0
   Biomes:
   - Height: 0.43
     TerrainType: {fileID: 11400000, guid: 58068fb5ef67b8b4eaaef528357bf712, type: 2}
