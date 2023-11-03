@@ -212,7 +212,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 1175574646}
   m_Follow: {fileID: 1175574646}
   m_Lens:
-    FieldOfView: 50
+    FieldOfView: 27.25947
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -2795,6 +2795,11 @@ MonoBehaviour:
   <Height>k__BackingField: 32
   <HexSize>k__BackingField: 30
   <BatchSize>k__BackingField: 50
+  DefaultVisibleCells:
+  - {x: 1, y: 1}
+  - {x: 11, y: 2}
+  - {x: 6, y: 4}
+  DefaultVisibleRadius: 3
   cells: []
 --- !u!4 &1657913341
 Transform:
