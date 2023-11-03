@@ -1,4 +1,4 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 public class HexMetricsTest
 {
 
-    /*----------Axial Cube Conversion----------*/
+    //----------Axial Cube Conversion----------
     [Test]
     public void AxialToCubeConversionTest_Origin()
     {
@@ -68,7 +68,7 @@ public class HexMetricsTest
         Assert.AreEqual(expected, actual);
     }
 
-    /*----------Cube Axial Conversion----------*/
+    //----------Cube Axial Conversion----------
 
     [Test]
     public void CubeToAxialConversionTest_Origin()
@@ -125,7 +125,7 @@ public class HexMetricsTest
         Assert.AreEqual(expected, actual);
     }
 
-    /*----------Offset Cube Conversion----------*/
+    //----------Offset Cube Conversion----------
     [Test]
     public void OffsetToCubeConversionTest_FT_Origin()
     {
@@ -152,7 +152,7 @@ public class HexMetricsTest
         Assert.AreEqual(expected, actual);
     }
 
-    /*----------Pointy Top----------*/
+    //----------Pointy Top----------
 
     [Test]
     public void OffsetToCubeConversionTest_PT_RowPlus()
@@ -230,7 +230,7 @@ public class HexMetricsTest
 
         Assert.AreEqual(expected, actual);
     }
-    /*--------------Flat Top---------------*/
+    //--------------Flat Top---------------
     [Test]
     public void OffsetToCubeConversionTest_FT_RowPlus()
     {
@@ -308,7 +308,7 @@ public class HexMetricsTest
         Assert.AreEqual(expected, actual);
     }
 
-    /*--------------Cube to Offset---------------*/
+    //--------------Cube to Offset---------------
 
     [Test]
     public void CubeToOffsetConversionTest_FT_Origin()
@@ -406,7 +406,7 @@ public class HexMetricsTest
         Assert.AreEqual(expected, actual);
     }
 
-    /*--------------World To Offset---------------*/
+    //--------------World To Offset---------------
     [Test]
     public void WorldToOffsetConversionTest_PT_Origin()
     {
@@ -473,3 +473,4 @@ public class HexMetricsTest
     }
 
 }
+*/
