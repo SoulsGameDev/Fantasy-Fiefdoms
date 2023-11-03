@@ -26,12 +26,20 @@ public class CameraController : Singleton<CameraController>
     [SerializeField] private float cameraZoomMin = 15f;
     [SerializeField] private float cameraZoomMax = 100f;
     [SerializeField] private float cameraZoomDefault = 50f;
+    
+    [SerializeField] private bool isLocked = false;
 
 
     private Coroutine panCoroutine;
     private Coroutine zoomCoroutine;
 
     public event Action<CinemachineVirtualCamera> onCameraChanged;
+    public event Action onSelectAction;
+    public event Action onDeselectAction;
+    public event Action onFocusAction;
+
+    public bool IsLocked { get => isLocked; set => isLocked = value; }
+    public GameObject CameraTarget { get => cameraTarget; }
 
     void Start()
     {
@@ -64,6 +72,10 @@ public class CameraController : Singleton<CameraController>
 
     public void OnPanChange(InputAction.CallbackContext context)
     {
+        if(isLocked)
+        {
+            return;
+        }
         if (context.performed)
         {
             if(panCoroutine != null)
@@ -79,7 +91,7 @@ public class CameraController : Singleton<CameraController>
                 StopCoroutine(panCoroutine);
             }
         }
-        ChangeCamera(CameraMode.TopDown);
+        //ChangeCamera(CameraMode.TopDown);
     }
 
     public void OnZoomChanged(InputAction.CallbackContext context)
@@ -114,14 +126,24 @@ public class CameraController : Singleton<CameraController>
         else if (context.performed)
         {
             //Debug.Log("Double tapped - Focus");
-            ChangeCamera(CameraMode.Focus);
+            //ChangeCamera(CameraMode.Focus);
+            onFocusAction?.Invoke();
         }
         else if (context.canceled)
         {
             //Debug.Log("Single tap - Select");
+            onSelectAction?.Invoke();
         }
     }
 
+    public void OnDeselectAction(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            //Debug.Log("Double tapped - Deselect");
+            onDeselectAction?.Invoke();
+        }
+    }
 
 
     public IEnumerator ProcessPan(InputAction.CallbackContext context)

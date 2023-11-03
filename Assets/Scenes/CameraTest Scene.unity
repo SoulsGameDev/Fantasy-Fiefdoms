@@ -212,7 +212,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 1175574646}
   m_Follow: {fileID: 1175574646}
   m_Lens:
-    FieldOfView: 27.25947
+    FieldOfView: 50
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -1940,6 +1940,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: b61db946-f6a0-49f3-a3ae-4b6c4a1ee277
     m_ActionName: UI/Confirm[/Keyboard/enter]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1175574648}
+        m_TargetAssemblyTypeName: CameraController, Assembly-CSharp
+        m_MethodName: OnDeselectAction
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 4570f338-324f-4776-9e92-49f91f0c8ac6
+    m_ActionName: World/Deselect[/Keyboard/backspace,/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard and Mouse
   m_DefaultActionMap: World
@@ -1967,6 +1983,7 @@ MonoBehaviour:
   cameraZoomMin: 5
   cameraZoomMax: 120
   cameraZoomDefault: 50
+  isLocked: 0
 --- !u!1 &1393108954
 GameObject:
   m_ObjectHideFlags: 0

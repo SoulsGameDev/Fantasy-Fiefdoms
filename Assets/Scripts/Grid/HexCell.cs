@@ -153,4 +153,19 @@ public class HexCell
         ChangeState(State.OnMouseExit());
     }
 
+    public void OnSelect()
+    {
+        ChangeState(State.OnSelect());
+    }
+
+    public void OnDeselect()
+    {
+        ChangeState(State.OnDeselect());
+    }
+
+    public void OnFocus()
+    {
+        ChangeState(State.OnFocus());
+    }
+
 }
