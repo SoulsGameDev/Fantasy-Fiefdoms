@@ -404,4 +404,16 @@ public static class HexMetrics
     {
         return CubeToOffset(AxialToCube(CoordinateToAxial(x, z, hexSize, orientation)), orientation);
     }
+
+    public static List<Vector2> GetNeighbourCoordinatesList(Vector2 axialCoordinates)
+    {
+        List<Vector2> neighbours = new List<Vector2>();
+        neighbours.Add(new Vector2(axialCoordinates.x + 1, axialCoordinates.y));
+        neighbours.Add(new Vector2(axialCoordinates.x - 1, axialCoordinates.y));
+        neighbours.Add(new Vector2(axialCoordinates.x, axialCoordinates.y + 1));
+        neighbours.Add(new Vector2(axialCoordinates.x, axialCoordinates.y - 1));
+        neighbours.Add(new Vector2(axialCoordinates.x + 1, axialCoordinates.y - 1));
+        neighbours.Add(new Vector2(axialCoordinates.x - 1, axialCoordinates.y + 1));
+        return neighbours;
+    }
 }
