@@ -24,6 +24,7 @@ public class OrbitCameraWithTime : MonoBehaviour
         if(orbitalCamera == null)
         {
             Debug.LogError("No orbital camera found");
+            return;
         }
 
         orbitalTransposer = orbitalCamera.GetCinemachineComponent<CinemachineOrbitalTransposer>();
@@ -31,6 +32,7 @@ public class OrbitCameraWithTime : MonoBehaviour
         if(orbitalTransposer == null)
         {
             Debug.LogError("No orbital transposer found");
+            return;
         }
 
         rotationSpeed = orbitalTransposer.m_XAxis.m_MaxSpeed;
@@ -38,12 +40,27 @@ public class OrbitCameraWithTime : MonoBehaviour
         CameraController.Instance.onCameraChanged += OnCameraChange;
     }
 
+    private void OnDestroy()
+    {
+        if (CameraController.Instance != null)
+        {
+            CameraController.Instance.onCameraChanged -= OnCameraChange;
+        }
+    }
+
     private void OnCameraChange(CinemachineVirtualCamera camera)
     {
         if(camera != orbitalCamera)
         {
+            if (rotationCoroutine != null)
+            {
+                Debug.Log("Stop rotation - different camera");
+                StopCoroutine(rotationCoroutine);
+                rotationCoroutine = null;
+            }
             return;
         }
+
         CinemachineOrbitalTransposer newTransposer = camera.GetCinemachineComponent<CinemachineOrbitalTransposer>();
         if(orbitalTransposer == newTransposer)
         {
@@ -54,11 +71,6 @@ public class OrbitCameraWithTime : MonoBehaviour
             }
             Debug.Log("Start rotation");
             rotationCoroutine = StartCoroutine(Rotate());
-        }
-        else
-        {
-            Debug.Log("Stop rotation");
-            StopCoroutine(rotationCoroutine);
         }
     }
 
