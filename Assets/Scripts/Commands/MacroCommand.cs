@@ -15,6 +15,11 @@ public class MacroCommand : CommandBase
 
     public override string Description => description ?? $"Macro ({commands.Count} commands)";
 
+    /// <summary>
+    /// Public access to commands for memory estimation
+    /// </summary>
+    public IReadOnlyList<ICommand> Commands => commands;
+
     public MacroCommand(string description = null)
     {
         this.description = description;

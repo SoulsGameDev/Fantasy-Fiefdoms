@@ -86,6 +86,13 @@ public class TransitionGuardRegistry
     // Enable/disable guard evaluation globally (useful for debugging)
     private bool guardsEnabled = true;
 
+    // Cache for guard evaluation results
+    // Key: (cellInstanceID, fromState, toState, inputEvent)
+    // Value: (result, timestamp)
+    private Dictionary<int, (GuardResult result, float time)> guardCache =
+        new Dictionary<int, (GuardResult result, float time)>();
+    private float cacheDuration = 0.1f; // 100ms cache validity
+
     private TransitionGuardRegistry() { }
 
     /// <summary>
@@ -247,6 +254,18 @@ public class TransitionGuardRegistry
             return GuardResult.Allow();
         }
 
+        // Generate cache key
+        int cacheKey = GenerateCacheKey(context);
+
+        // Check cache
+        if (guardCache.TryGetValue(cacheKey, out var cached))
+        {
+            if (Time.time - cached.time < cacheDuration)
+            {
+                return cached.result;
+            }
+        }
+
         // Collect all applicable guards
         List<ITransitionGuard> applicableGuards = new List<ITransitionGuard>();
 
@@ -273,18 +292,51 @@ public class TransitionGuardRegistry
         }
 
         // Evaluate all guards (AND logic - all must pass)
+        GuardResult result = GuardResult.Allow();
         foreach (var guard in applicableGuards)
         {
-            var result = guard.Evaluate(context);
+            result = guard.Evaluate(context);
             if (!result.Success)
             {
                 // Log the failure
                 Debug.LogWarning($"Transition {context.FromState} -> {context.ToState} blocked: {result.Reason}");
-                return result;
+                break;
             }
         }
 
-        return GuardResult.Allow();
+        // Cache the result
+        guardCache[cacheKey] = (result, Time.time);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Generate a cache key for guard evaluation
+    /// </summary>
+    private int GenerateCacheKey(GuardContext context)
+    {
+        // Combine cell instance ID, states, and input event
+        int hash = context.Cell != null ? context.Cell.GetHashCode() : 0;
+        hash = hash * 31 + (int)context.FromState;
+        hash = hash * 31 + (int)context.ToState;
+        hash = hash * 31 + (int)context.InputEvent;
+        return hash;
+    }
+
+    /// <summary>
+    /// Clear the guard result cache (call when guards are modified)
+    /// </summary>
+    public void ClearCache()
+    {
+        guardCache.Clear();
+    }
+
+    /// <summary>
+    /// Set the cache duration in seconds (default: 0.1s)
+    /// </summary>
+    public void SetCacheDuration(float duration)
+    {
+        cacheDuration = Mathf.Max(0f, duration);
     }
 
     /// <summary>
@@ -315,6 +367,7 @@ public class TransitionGuardRegistry
         transitionGuards.Clear();
         fromStateGuards.Clear();
         toStateGuards.Clear();
+        ClearCache(); // Clear cache when guards change
     }
 
     /// <summary>
