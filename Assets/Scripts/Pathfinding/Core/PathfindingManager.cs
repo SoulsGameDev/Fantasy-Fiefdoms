@@ -27,8 +27,12 @@ namespace Pathfinding.Core
         /// </summary>
         public enum AlgorithmType
         {
-            AStar,
-            // Future: Dijkstra, BFS, FlowField, etc.
+            AStar,              // Optimal paths with heuristic (default)
+            Dijkstra,           // All shortest paths from source
+            BFS,                // Fast unweighted pathfinding
+            BestFirst,          // Fast greedy pathfinding (non-optimal)
+            BidirectionalAStar, // Fast for long paths
+            FlowField           // Many units to same destination
         }
 
         /// <summary>
@@ -104,8 +108,12 @@ namespace Pathfinding.Core
         {
             algorithms = new Dictionary<AlgorithmType, IPathfindingAlgorithm>
             {
-                { AlgorithmType.AStar, new AStarPathfinding() }
-                // Add more algorithms here as they're implemented
+                { AlgorithmType.AStar, new AStarPathfinding() },
+                { AlgorithmType.Dijkstra, new DijkstraPathfinding() },
+                { AlgorithmType.BFS, new BreadthFirstSearch() },
+                { AlgorithmType.BestFirst, new BestFirstSearch() },
+                { AlgorithmType.BidirectionalAStar, new BidirectionalAStar() },
+                { AlgorithmType.FlowField, new FlowFieldPathfinding() }
             };
 
             currentAlgorithm = algorithms[defaultAlgorithm];
@@ -639,6 +647,87 @@ namespace Pathfinding.Core
             totalPathsFound = 0;
             totalCacheHits = 0;
             totalComputationTime = 0f;
+        }
+
+        // ========== ALGORITHM-SPECIFIC HELPERS ==========
+
+        /// <summary>
+        /// Runs Dijkstra's algorithm to find distances to all reachable cells.
+        /// Use this when you need paths from one source to many destinations.
+        /// </summary>
+        public DijkstraResult FindAllPathsFrom(HexCell start, PathfindingContext context)
+        {
+            var dijkstra = algorithms[AlgorithmType.Dijkstra] as DijkstraPathfinding;
+            if (dijkstra == null)
+            {
+                Debug.LogError("Dijkstra algorithm not available");
+                return DijkstraResult.CreateFailure("Dijkstra not initialized");
+            }
+
+            return dijkstra.FindAllPaths(start, context);
+        }
+
+        /// <summary>
+        /// Generates a flow field for efficient multi-unit pathfinding to the same goal.
+        /// Use this when moving many units to the same destination.
+        /// </summary>
+        public FlowField GenerateFlowField(HexCell goal, PathfindingContext context)
+        {
+            var flowField = algorithms[AlgorithmType.FlowField] as FlowFieldPathfinding;
+            if (flowField == null)
+            {
+                Debug.LogError("FlowField algorithm not available");
+                return FlowField.CreateEmpty();
+            }
+
+            return flowField.GenerateFlowField(goal, context);
+        }
+
+        /// <summary>
+        /// Gets cells within a certain number of steps (ignoring terrain cost).
+        /// Fast unweighted reachability check.
+        /// </summary>
+        public List<HexCell> GetCellsWithinSteps(HexCell start, int maxSteps, PathfindingContext context)
+        {
+            var bfs = algorithms[AlgorithmType.BFS] as BreadthFirstSearch;
+            if (bfs == null)
+            {
+                Debug.LogError("BFS algorithm not available");
+                return new List<HexCell>();
+            }
+
+            return bfs.GetCellsWithinSteps(start, maxSteps, context);
+        }
+
+        /// <summary>
+        /// Gets the algorithm instance for a specific type.
+        /// Allows access to algorithm-specific methods.
+        /// </summary>
+        public IPathfindingAlgorithm GetAlgorithm(AlgorithmType type)
+        {
+            if (algorithms.TryGetValue(type, out IPathfindingAlgorithm algorithm))
+            {
+                return algorithm;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets information about all available algorithms
+        /// </summary>
+        public string GetAlgorithmInfo()
+        {
+            var info = "Available Pathfinding Algorithms:\n\n";
+
+            foreach (var kvp in algorithms)
+            {
+                var algo = kvp.Value;
+                info += $"{kvp.Key} ({algo.AlgorithmName}):\n";
+                info += $"  {algo.Description}\n";
+                info += $"  Threading: {(algo.SupportsThreading ? "Yes" : "No")}\n\n";
+            }
+
+            return info;
         }
     }
 }
