@@ -280,6 +280,188 @@ namespace Pathfinding.Core
             return reachable;
         }
 
+        // ========== MULTI-TURN PATHFINDING ==========
+
+        /// <summary>
+        /// Finds a multi-turn path when the destination is beyond single-turn movement range.
+        /// Splits the path into segments that respect per-turn movement limits.
+        /// </summary>
+        public MultiTurnPathResult FindMultiTurnPath(HexCell start, HexCell goal, int movementPerTurn)
+        {
+            return FindMultiTurnPath(start, goal, movementPerTurn, new PathfindingContext());
+        }
+
+        /// <summary>
+        /// Finds a multi-turn path with custom context.
+        /// Automatically splits long paths into turn-based segments.
+        /// </summary>
+        public MultiTurnPathResult FindMultiTurnPath(
+            HexCell start,
+            HexCell goal,
+            int movementPerTurn,
+            PathfindingContext context)
+        {
+            if (start == null || goal == null)
+            {
+                return MultiTurnPathResult.CreateFailure(start, goal,
+                    "Start or goal is null", movementPerTurn);
+            }
+
+            if (movementPerTurn <= 0)
+            {
+                return MultiTurnPathResult.CreateFailure(start, goal,
+                    "Movement per turn must be positive", movementPerTurn);
+            }
+
+            // Find the complete path without movement limit
+            var unlimitedContext = context.Clone();
+            unlimitedContext.MaxMovementPoints = -1; // Remove movement limit for initial search
+            unlimitedContext.UseCaching = false; // Don't cache unlimited paths
+
+            PathResult completePath = FindPath(start, goal, unlimitedContext);
+
+            if (!completePath.Success)
+            {
+                return MultiTurnPathResult.CreateFailure(start, goal,
+                    completePath.FailureReason, movementPerTurn);
+            }
+
+            // Split path into turn segments
+            return MultiTurnPathResult.CreateFromSinglePath(completePath, movementPerTurn, context);
+        }
+
+        /// <summary>
+        /// Finds a multi-turn path asynchronously
+        /// </summary>
+        public async Task<MultiTurnPathResult> FindMultiTurnPathAsync(
+            HexCell start,
+            HexCell goal,
+            int movementPerTurn,
+            PathfindingContext context)
+        {
+            MultiTurnPathResult result;
+
+            if (currentAlgorithm.SupportsThreading)
+            {
+                // Run on background thread
+                result = await Task.Run(() => FindMultiTurnPath(start, goal, movementPerTurn, context));
+            }
+            else
+            {
+                // Run on main thread
+                result = FindMultiTurnPath(start, goal, movementPerTurn, context);
+                await Task.Yield();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets all cells reachable within N turns from start position.
+        /// Returns cells grouped by turn they can be reached in.
+        /// </summary>
+        public Dictionary<int, List<HexCell>> GetMultiTurnReachableCells(
+            HexCell start,
+            int movementPerTurn,
+            int maxTurns)
+        {
+            var cellsByTurn = new Dictionary<int, List<HexCell>>();
+
+            if (start == null || movementPerTurn <= 0 || maxTurns <= 0)
+                return cellsByTurn;
+
+            var visited = new HashSet<HexCell>();
+            var queue = new Queue<(HexCell cell, int cost, int turn)>();
+
+            // Initialize with start cell
+            queue.Enqueue((start, 0, 0));
+            visited.Add(start);
+            cellsByTurn[0] = new List<HexCell> { start };
+
+            var context = new PathfindingContext
+            {
+                RequireExplored = true
+            };
+
+            while (queue.Count > 0)
+            {
+                var (current, currentCost, currentTurn) = queue.Dequeue();
+
+                // Stop if we've reached max turns
+                if (currentTurn >= maxTurns)
+                    continue;
+
+                var neighbors = current.GetNeighbors();
+                if (neighbors == null)
+                    continue;
+
+                foreach (var neighbor in neighbors)
+                {
+                    if (neighbor == null || visited.Contains(neighbor))
+                        continue;
+
+                    if (!neighbor.PathfindingState.IsWalkable)
+                        continue;
+
+                    if (context.RequireExplored && !neighbor.PathfindingState.IsExplored)
+                        continue;
+
+                    int moveCost = context.GetEffectiveMovementCost(neighbor);
+                    int newCost = currentCost + moveCost;
+                    int newTurn = currentTurn;
+
+                    // Check if we need to move to next turn
+                    if (newCost > movementPerTurn)
+                    {
+                        newTurn++;
+                        newCost = moveCost; // Reset cost for new turn
+
+                        if (newTurn >= maxTurns)
+                            continue;
+                    }
+
+                    visited.Add(neighbor);
+
+                    // Add to appropriate turn list
+                    if (!cellsByTurn.ContainsKey(newTurn))
+                    {
+                        cellsByTurn[newTurn] = new List<HexCell>();
+                    }
+                    cellsByTurn[newTurn].Add(neighbor);
+
+                    queue.Enqueue((neighbor, newCost, newTurn));
+                }
+            }
+
+            return cellsByTurn;
+        }
+
+        /// <summary>
+        /// Estimates how many turns it would take to reach goal from start.
+        /// Uses straight-line distance and average terrain cost.
+        /// </summary>
+        public int EstimateTurnsToReach(HexCell start, HexCell goal, int movementPerTurn)
+        {
+            if (start == null || goal == null || movementPerTurn <= 0)
+                return -1;
+
+            // Calculate hex distance
+            Vector3 startCube = start.CubeCoordinates;
+            Vector3 goalCube = goal.CubeCoordinates;
+
+            int hexDistance = (int)((Mathf.Abs(startCube.x - goalCube.x) +
+                                     Mathf.Abs(startCube.y - goalCube.y) +
+                                     Mathf.Abs(startCube.z - goalCube.z)) / 2);
+
+            // Estimate based on average terrain cost of 1
+            int estimatedCost = hexDistance;
+
+            // Calculate turns needed
+            int turns = Mathf.CeilToInt((float)estimatedCost / movementPerTurn);
+
+            return Mathf.Max(1, turns);
+        }
+
         /// <summary>
         /// Clears all reachability visualization
         /// </summary>

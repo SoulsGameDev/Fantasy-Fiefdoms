@@ -347,6 +347,216 @@ if (result.Success)
 }
 ```
 
+## Multi-Turn Pathfinding
+
+For turn-based strategy games, units often need to plan paths that span multiple turns. The multi-turn pathfinding system automatically splits long paths into turn-based segments.
+
+### Features
+
+- **Automatic Path Splitting** - Divides paths based on movement budget per turn
+- **Turn Endpoints** - Identifies where units will stop each turn
+- **Multi-Turn Reachability** - Shows cells reachable in each of N turns
+- **Turn Estimation** - Quick distance-based turn count estimation
+- **Journey Planning** - Multi-waypoint paths across many turns
+- **Progress Tracking** - Get remaining path after partial completion
+- **Color-Coded Visualization** - Different colors for each turn segment
+
+### Basic Usage
+
+```csharp
+// Find a multi-turn path
+HexCell start = hexGrid.Cells[0, 0];
+HexCell goal = hexGrid.Cells[25, 25];
+int movementPerTurn = 5;
+
+MultiTurnPathResult path = PathfindingManager.Instance.FindMultiTurnPath(
+    start, goal, movementPerTurn);
+
+if (path.Success)
+{
+    Debug.Log($"Path requires {path.TurnsRequired} turns");
+    Debug.Log($"Total cost: {path.TotalCost}");
+
+    // Print turn breakdown
+    Debug.Log(path.GetTurnBreakdown());
+
+    // Check if reachable in one turn
+    if (path.IsSingleTurnPath())
+    {
+        Debug.Log("Can reach in one turn!");
+    }
+}
+```
+
+### Execute Path Turn by Turn
+
+```csharp
+MultiTurnPathResult path = PathfindingManager.Instance.FindMultiTurnPath(
+    start, goal, movementPerTurn);
+
+if (path.Success)
+{
+    // Execute each turn separately
+    for (int turn = 0; turn < path.TurnsRequired; turn++)
+    {
+        var turnPath = path.GetTurnPath(turn);
+        var turnCost = path.GetTurnCost(turn);
+        var endpoint = path.GetTurnEndpoint(turn);
+
+        Debug.Log($"Turn {turn + 1}: {turnPath.Count} cells, " +
+                 $"Cost: {turnCost}/{movementPerTurn}");
+
+        // Execute this turn's movement
+        var turnCmd = new ExecuteTurnMovementCommand(unit, path, turn);
+        CommandHistory.Instance.ExecuteCommand(turnCmd);
+
+        // Wait for turn to end...
+    }
+}
+```
+
+### Multi-Turn Reachability
+
+Show which cells can be reached in each of N turns:
+
+```csharp
+HexCell start = hexGrid.Cells[10, 10];
+int movementPerTurn = 5;
+int maxTurns = 3;
+
+Dictionary<int, List<HexCell>> cellsByTurn =
+    PathfindingManager.Instance.GetMultiTurnReachableCells(
+        start, movementPerTurn, maxTurns);
+
+foreach (var kvp in cellsByTurn)
+{
+    int turnNumber = kvp.Key + 1;
+    int cellCount = kvp.Value.Count;
+    Debug.Log($"Turn {turnNumber}: {cellCount} cells reachable");
+}
+
+// Visualize with color coding
+visualizer.VisualizeReachability(cellsByTurn);
+```
+
+### Quick Turn Estimation
+
+Estimate turns needed without full pathfinding:
+
+```csharp
+int estimatedTurns = PathfindingManager.Instance.EstimateTurnsToReach(
+    start, goal, movementPerTurn);
+
+Debug.Log($"Estimated: {estimatedTurns} turns");
+
+// Compare with actual
+MultiTurnPathResult actualPath = PathfindingManager.Instance.FindMultiTurnPath(
+    start, goal, movementPerTurn);
+
+Debug.Log($"Actual: {actualPath.TurnsRequired} turns");
+```
+
+### Multi-Waypoint Journeys
+
+Plan complex routes with multiple stops:
+
+```csharp
+HexCell start = hexGrid.Cells[0, 0];
+List<HexCell> waypoints = new List<HexCell>
+{
+    hexGrid.Cells[10, 5],   // Stop 1
+    hexGrid.Cells[15, 15],  // Stop 2
+    hexGrid.Cells[20, 10],  // Stop 3
+    hexGrid.Cells[25, 0]    // Final destination
+};
+
+var journeyCmd = new PlanMultiTurnJourneyCommand(start, waypoints, movementPerTurn);
+CommandHistory.Instance.ExecuteCommand(journeyCmd);
+
+Debug.Log($"Total turns: {journeyCmd.GetTotalTurns()}");
+```
+
+### Path Progress Tracking
+
+Handle partially completed paths:
+
+```csharp
+MultiTurnPathResult fullPath = PathfindingManager.Instance.FindMultiTurnPath(
+    start, goal, movementPerTurn);
+
+// After completing 2 turns
+int completedTurns = 2;
+List<HexCell> remaining = fullPath.GetRemainingPath(completedTurns);
+
+Debug.Log($"Completed {completedTurns}/{fullPath.TurnsRequired} turns");
+Debug.Log($"Remaining: {remaining.Count} cells");
+
+// Visualize progress
+visualizer.ShowPathUpToTurn(fullPath, completedTurns);
+```
+
+### Movement Efficiency
+
+Analyze how well turns are utilized:
+
+```csharp
+MultiTurnPathResult path = PathfindingManager.Instance.FindMultiTurnPath(
+    start, goal, movementPerTurn);
+
+float avgEfficiency = path.GetAverageMovementEfficiency();
+Debug.Log($"Average efficiency: {avgEfficiency:P0}");
+
+// Check each turn
+for (int i = 0; i < path.TurnsRequired; i++)
+{
+    bool full = path.IsTurnAtCapacity(i);
+    int cost = path.GetTurnCost(i);
+    Debug.Log($"Turn {i + 1}: {cost}/{movementPerTurn} " +
+             (full ? "[FULL]" : ""));
+}
+```
+
+### Visualization
+
+Use `MultiTurnPathVisualizer` for color-coded path display:
+
+```csharp
+[SerializeField] private MultiTurnPathVisualizer visualizer;
+
+// Visualize complete path with turn colors
+visualizer.VisualizePath(multiTurnPath);
+
+// Highlight specific turn
+visualizer.HighlightTurn(multiTurnPath, turnIndex: 1);
+
+// Show progress up to current turn
+visualizer.ShowPathUpToTurn(multiTurnPath, completedTurns: 2);
+
+// Clear visualization
+visualizer.ClearVisualization();
+```
+
+### Commands
+
+All multi-turn operations support undo/redo:
+
+```csharp
+// Find and visualize multi-turn path
+var findCmd = new FindMultiTurnPathCommand(start, goal, movementPerTurn);
+CommandHistory.Instance.ExecuteCommand(findCmd);
+
+// Execute entire multi-turn path
+var executeCmd = new ExecuteMultiTurnPathCommand(unit, findCmd.Result);
+CommandHistory.Instance.ExecuteCommand(executeCmd);
+
+// Show multi-turn reachability
+var reachCmd = new ShowMultiTurnReachableCommand(start, movementPerTurn, maxTurns: 3);
+CommandHistory.Instance.ExecuteCommand(reachCmd);
+
+// All can be undone
+CommandHistory.Instance.Undo();
+```
+
 ## Future Enhancements
 
 Planned features for future versions:
@@ -355,7 +565,6 @@ Planned features for future versions:
 - **Flow Field Pathfinding** - For efficient multi-unit movement to same destination
 - **Hierarchical Pathfinding** - For very large maps (divide into regions)
 - **Jump Point Search** - Grid-optimized A* variant
-- **Multi-turn Pathfinding** - Split long paths into per-turn segments
 - **Dynamic Obstacle Avoidance** - Real-time path adjustment
 - **Path Smoothing** - Visual path optimization
 
@@ -367,6 +576,10 @@ Planned features for future versions:
 - `FindPath(start, goal, context)` - Synchronous pathfinding
 - `FindPathAsync(start, goal, context)` - Asynchronous pathfinding
 - `GetReachableCells(start, maxMovement)` - Calculate movement range
+- `FindMultiTurnPath(start, goal, movementPerTurn)` - Multi-turn pathfinding
+- `FindMultiTurnPathAsync(start, goal, movementPerTurn, context)` - Async multi-turn
+- `GetMultiTurnReachableCells(start, movementPerTurn, maxTurns)` - Multi-turn reachability
+- `EstimateTurnsToReach(start, goal, movementPerTurn)` - Quick turn estimation
 - `ClearPaths(grid)` - Clear path visualization
 - `ClearReachability(grid)` - Clear reachability visualization
 - `InvalidateCache(cells)` - Invalidate cached paths
@@ -383,6 +596,28 @@ Planned features for future versions:
 - `FailureReason` - Explanation if path failed
 - `CostMap` - Costs to reach each explored cell (diagnostic)
 - `CameFrom` - Parent pointers for path reconstruction (diagnostic)
+
+### MultiTurnPathResult
+
+**Properties:**
+- `Success` - Whether path was found
+- `CompletePath` - Full path from start to goal
+- `PathPerTurn` - List of turn segments (List<List<HexCell>>)
+- `CostPerTurn` - Movement cost for each turn
+- `TurnsRequired` - Number of turns to complete path
+- `TotalCost` - Sum of all turn costs
+- `MovementPerTurn` - Movement budget per turn
+- `TurnEndpoints` - Cells where unit stops each turn
+
+**Methods:**
+- `GetTurnPath(turnIndex)` - Get cells for specific turn
+- `GetTurnCost(turnIndex)` - Get cost for specific turn
+- `GetTurnEndpoint(turnIndex)` - Get endpoint for turn
+- `IsSingleTurnPath()` - Check if reachable in one turn
+- `GetRemainingPath(completedTurns)` - Get unfinished portion
+- `GetTurnBreakdown()` - Formatted string of all turns
+- `GetAverageMovementEfficiency()` - Average turn utilization
+- `IsTurnAtCapacity(turnIndex)` - Check if turn uses full movement
 
 ### PathfindingContext
 
