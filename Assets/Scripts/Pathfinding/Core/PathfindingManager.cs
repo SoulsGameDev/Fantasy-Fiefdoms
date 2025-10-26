@@ -32,7 +32,8 @@ namespace Pathfinding.Core
             BFS,                // Fast unweighted pathfinding
             BestFirst,          // Fast greedy pathfinding (non-optimal)
             BidirectionalAStar, // Fast for long paths
-            FlowField           // Many units to same destination
+            FlowField,          // Many units to same destination
+            JPS                 // Jump Point Search - ultra-fast for open maps
         }
 
         /// <summary>
@@ -113,7 +114,8 @@ namespace Pathfinding.Core
                 { AlgorithmType.BFS, new BreadthFirstSearch() },
                 { AlgorithmType.BestFirst, new BestFirstSearch() },
                 { AlgorithmType.BidirectionalAStar, new BidirectionalAStar() },
-                { AlgorithmType.FlowField, new FlowFieldPathfinding() }
+                { AlgorithmType.FlowField, new FlowFieldPathfinding() },
+                { AlgorithmType.JPS, new JumpPointSearch() }
             };
 
             currentAlgorithm = algorithms[defaultAlgorithm];
