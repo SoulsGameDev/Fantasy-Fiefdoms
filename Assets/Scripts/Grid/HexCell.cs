@@ -16,6 +16,9 @@ public class HexCell
     [field:SerializeField] public Vector2 AxialCoordinates { get; private set; }
     [field:NonSerialized]public List<HexCell> Neighbours { get; private set; }
 
+    // Neighbor cache flag
+    private bool neighborsInitialized = false;
+
     private HexCellInteractionState interactionState;
     private HexCellStateManager stateManager;
     private HexCellPathfindingState pathfindingState;
@@ -282,6 +285,44 @@ public class HexCell
     public void SetNeighbours(List<HexCell> neighbours)
     {
         Neighbours = neighbours;
+        neighborsInitialized = true;
+    }
+
+    /// <summary>
+    /// Get a specific neighbor by direction (0-5)
+    /// Uses cached neighbors for performance
+    /// </summary>
+    public HexCell GetNeighbor(int direction)
+    {
+        if (!neighborsInitialized || Neighbours == null)
+        {
+            Debug.LogWarning("Neighbors not initialized for cell at " + OffsetCoordinates);
+            return null;
+        }
+
+        if (direction < 0 || direction >= Neighbours.Count)
+        {
+            Debug.LogWarning($"Invalid neighbor direction: {direction}");
+            return null;
+        }
+
+        return Neighbours[direction];
+    }
+
+    /// <summary>
+    /// Get all neighbors (cached)
+    /// </summary>
+    public List<HexCell> GetNeighbors()
+    {
+        return Neighbours;
+    }
+
+    /// <summary>
+    /// Check if neighbors are initialized
+    /// </summary>
+    public bool HasNeighbors()
+    {
+        return neighborsInitialized && Neighbours != null && Neighbours.Count > 0;
     }
 
     public void ClearTerrain()

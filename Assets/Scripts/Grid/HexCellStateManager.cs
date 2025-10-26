@@ -23,6 +23,36 @@ public class HexCellStateManager
     // Event fired when a transition is blocked by guards
     public event Action<CellState, CellState, string> OnTransitionBlocked;
 
+    // State transition lookup table for O(1) lookups
+    private static readonly Dictionary<(CellState, InputEvent), CellState> transitionTable =
+        new Dictionary<(CellState, InputEvent), CellState>()
+        {
+            // Invisible state transitions
+            { (CellState.Invisible, InputEvent.RevealFog), CellState.Visible },
+
+            // Visible state transitions
+            { (CellState.Visible, InputEvent.MouseEnter), CellState.Highlighted },
+            { (CellState.Visible, InputEvent.MouseDown), CellState.Selected },
+            { (CellState.Visible, InputEvent.FKeyDown), CellState.Focused },
+
+            // Highlighted state transitions
+            { (CellState.Highlighted, InputEvent.MouseExit), CellState.Visible },
+            { (CellState.Highlighted, InputEvent.MouseDown), CellState.Selected },
+            { (CellState.Highlighted, InputEvent.FKeyDown), CellState.Focused },
+
+            // Selected state transitions
+            { (CellState.Selected, InputEvent.MouseExit), CellState.Visible },
+            { (CellState.Selected, InputEvent.MouseUp), CellState.Highlighted },
+            { (CellState.Selected, InputEvent.FKeyDown), CellState.Focused },
+            { (CellState.Selected, InputEvent.Deselect), CellState.Visible },
+
+            // Focused state transitions
+            { (CellState.Focused, InputEvent.MouseExit), CellState.Selected },
+            { (CellState.Focused, InputEvent.MouseDown), CellState.Selected },
+            { (CellState.Focused, InputEvent.FKeyDown), CellState.Visible },
+            { (CellState.Focused, InputEvent.Deselect), CellState.Visible },
+        };
+
     public HexCellStateManager(HexCellInteractionState interactionState, HexCell cell = null)
     {
         this.interactionState = interactionState;
@@ -56,37 +86,18 @@ public class HexCellStateManager
     public void HandleInput(InputEvent inputEvent)
     {
         CellState currentState = interactionState.State;
-        CellState nextState = currentState;
 
-        // State transition logic based on current state and input event
-        switch (currentState)
+        // Use transition table for O(1) lookup
+        if (transitionTable.TryGetValue((currentState, inputEvent), out CellState nextState))
         {
-            case CellState.Invisible:
-                nextState = HandleInvisibleState(inputEvent);
-                break;
-            case CellState.Visible:
-                nextState = HandleVisibleState(inputEvent);
-                break;
-            case CellState.Highlighted:
-                nextState = HandleHighlightedState(inputEvent);
-                break;
-            case CellState.Selected:
-                nextState = HandleSelectedState(inputEvent);
-                break;
-            case CellState.Focused:
-                nextState = HandleFocusedState(inputEvent);
-                break;
-        }
-
-        // Check if transition is valid and allowed by guards
-        if (nextState != currentState)
-        {
+            // Check if transition is valid and allowed by guards
             if (EvaluateGuards(currentState, nextState, inputEvent))
             {
                 interactionState.SetState(nextState);
             }
             // If guards blocked the transition, state remains unchanged
         }
+        // No valid transition for this input in current state - ignore
     }
 
     private CellState HandleInvisibleState(InputEvent inputEvent)
@@ -223,21 +234,12 @@ public class HexCellStateManager
     /// </summary>
     private CellState PredictNextState(CellState current, InputEvent inputEvent)
     {
-        switch (current)
+        // Use transition table for O(1) lookup
+        if (transitionTable.TryGetValue((current, inputEvent), out CellState nextState))
         {
-            case CellState.Invisible:
-                return HandleInvisibleState(inputEvent);
-            case CellState.Visible:
-                return HandleVisibleState(inputEvent);
-            case CellState.Highlighted:
-                return HandleHighlightedState(inputEvent);
-            case CellState.Selected:
-                return HandleSelectedState(inputEvent);
-            case CellState.Focused:
-                return HandleFocusedState(inputEvent);
-            default:
-                return current;
+            return nextState;
         }
+        return current; // No transition defined
     }
 
     // ===== Public Methods =====

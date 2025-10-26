@@ -5,6 +5,24 @@ using UnityEngine;
 
 public static class HexMetrics
 {
+    // Coordinate conversion caches
+    private static Dictionary<(int, int, HexOrientation), Vector3> offsetToCubeCache =
+        new Dictionary<(int, int, HexOrientation), Vector3>();
+    private static Dictionary<(Vector3, HexOrientation), Vector2> cubeToOffsetCache =
+        new Dictionary<(Vector3, HexOrientation), Vector2>();
+    private static Dictionary<(float, float, float, HexOrientation), Vector2> coordinateToAxialCache =
+        new Dictionary<(float, float, float, HexOrientation), Vector2>();
+
+    /// <summary>
+    /// Clear all coordinate conversion caches
+    /// </summary>
+    public static void ClearConversionCaches()
+    {
+        offsetToCubeCache.Clear();
+        cubeToOffsetCache.Clear();
+        coordinateToAxialCache.Clear();
+    }
+
     /// <summary>
     /// Gets the outer radius of the hexagon.
     /// </summary>
@@ -115,14 +133,28 @@ public static class HexMetrics
     /// <returns></returns>
     public static Vector3 OffsetToCube(int col, int row, HexOrientation orientation)
     {
+        var key = (col, row, orientation);
+
+        // Check cache
+        if (offsetToCubeCache.TryGetValue(key, out Vector3 cachedResult))
+        {
+            return cachedResult;
+        }
+
+        // Calculate
+        Vector3 result;
         if (orientation == HexOrientation.PointyTop)
         {
-            return AxialToCube(OffsetToAxialPointy(col, row));
+            result = AxialToCube(OffsetToAxialPointy(col, row));
         }
         else
         {
-            return AxialToCube(OffsetToAxialFlat(col, row));
+            result = AxialToCube(OffsetToAxialFlat(col, row));
         }
+
+        // Cache and return
+        offsetToCubeCache[key] = result;
+        return result;
     }
 
     /// <summary>
@@ -256,14 +288,29 @@ public static class HexMetrics
     /// <returns></returns>
     public static Vector2 CubeToOffset(int x, int y, int z, HexOrientation orientation)
     {
+        Vector3 cubeCoord = new Vector3(x, y, z);
+        var key = (cubeCoord, orientation);
+
+        // Check cache
+        if (cubeToOffsetCache.TryGetValue(key, out Vector2 cachedResult))
+        {
+            return cachedResult;
+        }
+
+        // Calculate
+        Vector2 result;
         if (orientation == HexOrientation.PointyTop)
         {
-            return CubeToOffsetPointy(x, y, z);
+            result = CubeToOffsetPointy(x, y, z);
         }
         else
         {
-            return CubeToOffsetFlat(x, y, z);
+            result = CubeToOffsetFlat(x, y, z);
         }
+
+        // Cache and return
+        cubeToOffsetCache[key] = result;
+        return result;
     }
 
     /// <summary>
@@ -357,14 +404,28 @@ public static class HexMetrics
     /// <returns>Axial Coordiante</returns>
     public static Vector2 CoordinateToAxial(float x, float z, float hexSize, HexOrientation orientation)
     {
+        var key = (x, z, hexSize, orientation);
+
+        // Check cache
+        if (coordinateToAxialCache.TryGetValue(key, out Vector2 cachedResult))
+        {
+            return cachedResult;
+        }
+
+        // Calculate
+        Vector2 result;
         if (orientation == HexOrientation.PointyTop)
         {
-            return CoordinateToPointyAxial(x, z, hexSize);
+            result = CoordinateToPointyAxial(x, z, hexSize);
         }
         else
         {
-            return CoordinateToFlatAxial(x, z, hexSize);
+            result = CoordinateToFlatAxial(x, z, hexSize);
         }
+
+        // Cache and return
+        coordinateToAxialCache[key] = result;
+        return result;
     }
 
     /// <summary>
