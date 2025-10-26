@@ -7,9 +7,9 @@ using System;
 
 public class CameraController : Singleton<CameraController>
 {
-    [SerializeField]
     private const int DEFAULT_PRIORITY = 10;
 
+    [Header("Camera References")]
     [SerializeField]
     private GameObject cameraTarget;
     [SerializeField]
@@ -21,22 +21,48 @@ public class CameraController : Singleton<CameraController>
     [SerializeField]
     private CameraMode currentMode;
 
+    [Header("Movement Settings")]
     [SerializeField] private float cameraSpeed = 10f;
+    [SerializeField] private float cameraDamping = 5f;
+    [SerializeField] private Vector2 cameraBoundsMin = new Vector2(-100, -100);
+    [SerializeField] private Vector2 cameraBoundsMax = new Vector2(100, 100);
+
+    [Header("Zoom Settings")]
     [SerializeField] private float cameraZoomSpeed = 1f;
     [SerializeField] private float cameraZoomMin = 15f;
     [SerializeField] private float cameraZoomMax = 100f;
     [SerializeField] private float cameraZoomDefault = 50f;
 
+    [Header("Rotation Settings")]
+    [SerializeField] private bool enableRotation = false;
+    [SerializeField] private float cameraRotationSpeed = 50f;
+
+    // Cached references
+    private Transform cameraTargetTransform;
 
     private Coroutine panCoroutine;
     private Coroutine zoomCoroutine;
+    private Coroutine rotateCoroutine;
 
     public event Action<CinemachineVirtualCamera> onCameraChanged;
 
     void Start()
     {
+        cameraTargetTransform = cameraTarget.transform;
         topDownCamera.m_Lens.FieldOfView = cameraZoomDefault;
         ChangeCamera(defaultMode);
+    }
+
+    private void OnValidate()
+    {
+        // Ensure valid zoom range
+        cameraZoomMin = Mathf.Max(1f, cameraZoomMin);
+        cameraZoomMax = Mathf.Clamp(cameraZoomMax, cameraZoomMin + 1, 179f);
+        cameraZoomDefault = Mathf.Clamp(cameraZoomDefault, cameraZoomMin, cameraZoomMax);
+
+        // Ensure valid camera bounds
+        cameraBoundsMax.x = Mathf.Max(cameraBoundsMin.x + 1, cameraBoundsMax.x);
+        cameraBoundsMax.y = Mathf.Max(cameraBoundsMin.y + 1, cameraBoundsMax.y);
     }
 
     public void ChangeCamera(CameraMode mode)
@@ -61,47 +87,59 @@ public class CameraController : Singleton<CameraController>
         }
     }
 
+    /// <summary>
+    /// Safely stops a coroutine and sets the reference to null
+    /// </summary>
+    private void SafeStopCoroutine(ref Coroutine coroutine)
+    {
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+            coroutine = null;
+        }
+    }
+
 
     public void OnPanChange(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            if(panCoroutine != null)
-            {
-                StopCoroutine(panCoroutine);
-            }
+            SafeStopCoroutine(ref panCoroutine);
             panCoroutine = StartCoroutine(ProcessPan(context));
+            ChangeCamera(CameraMode.TopDown);
         }
         else if (context.canceled)
         {
-            if(panCoroutine != null)
-            {
-                StopCoroutine(panCoroutine);
-            }
+            SafeStopCoroutine(ref panCoroutine);
         }
-        ChangeCamera(CameraMode.TopDown);
     }
 
     public void OnZoomChanged(InputAction.CallbackContext context)
     {
-        if (context.started)
-        {
-            //Debug.Log("Pressed Zoom key");
-        }
         if (context.performed)
         {
-            if (zoomCoroutine != null)
-            {
-                StopCoroutine(zoomCoroutine);
-            }
+            SafeStopCoroutine(ref zoomCoroutine);
             zoomCoroutine = StartCoroutine(ProcessZoom(context));
         }
         else if (context.canceled)
         {
-            if (zoomCoroutine != null)
-            {
-                StopCoroutine(zoomCoroutine);
-            }
+            SafeStopCoroutine(ref zoomCoroutine);
+        }
+    }
+
+    public void OnRotateChange(InputAction.CallbackContext context)
+    {
+        if (!enableRotation)
+            return;
+
+        if (context.performed)
+        {
+            SafeStopCoroutine(ref rotateCoroutine);
+            rotateCoroutine = StartCoroutine(ProcessRotate(context));
+        }
+        else if (context.canceled)
+        {
+            SafeStopCoroutine(ref rotateCoroutine);
         }
     }
 
@@ -128,13 +166,22 @@ public class CameraController : Singleton<CameraController>
     {
         while (true)
         {
-            //Move the camera target in the direction of the input (2D Vector)
             Vector2 inputVector = context.ReadValue<Vector2>();
-            //Debug.Log("Moving: " + inputVector);
 
-            //Move the camera target in the direction of the input (2D Vector)
+            // Calculate target position with smooth damping
             Vector3 moveVector = new Vector3(inputVector.x, 0, inputVector.y);
-            cameraTarget.transform.position += moveVector * cameraSpeed * Time.deltaTime;
+            Vector3 targetPosition = cameraTargetTransform.position + moveVector * cameraSpeed * Time.deltaTime;
+
+            // Apply camera boundaries
+            targetPosition.x = Mathf.Clamp(targetPosition.x, cameraBoundsMin.x, cameraBoundsMax.x);
+            targetPosition.z = Mathf.Clamp(targetPosition.z, cameraBoundsMin.y, cameraBoundsMax.y);
+
+            // Smooth movement with damping
+            cameraTargetTransform.position = Vector3.Lerp(
+                cameraTargetTransform.position,
+                targetPosition,
+                cameraDamping * Time.deltaTime
+            );
 
             yield return null;
         }
@@ -142,15 +189,25 @@ public class CameraController : Singleton<CameraController>
 
     public IEnumerator ProcessZoom(InputAction.CallbackContext context)
     {
-        //Change the FOV of the camera based on the input. If not keyboard, then adjust the value based on the scrollWheelZoomSpeed
         float zoomInput = context.ReadValue<float>();
 
-        //Debug.Log("Zooming: " + zoomInput);
         while (true)
         {
-            //Change the FOV of the camera based on the input. If not keyboard, then adjust the value based on the scrollWheelZoomSpeed
             float zoomAmount = topDownCamera.m_Lens.FieldOfView + zoomInput * cameraZoomSpeed * Time.deltaTime;
             topDownCamera.m_Lens.FieldOfView = Mathf.Clamp(zoomAmount, cameraZoomMin, cameraZoomMax);
+
+            yield return null;
+        }
+    }
+
+    public IEnumerator ProcessRotate(InputAction.CallbackContext context)
+    {
+        float rotateInput = context.ReadValue<float>();
+
+        while (true)
+        {
+            // Rotate the camera target around the Y axis
+            cameraTargetTransform.Rotate(Vector3.up, rotateInput * cameraRotationSpeed * Time.deltaTime);
 
             yield return null;
         }
