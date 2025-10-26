@@ -201,6 +201,11 @@ public class HexCell
         return interactionState.IsInteractive();
     }
 
+    public void ForceState(CellState state)
+    {
+        stateManager.ForceState(state);
+    }
+
     public void SetCoordinates(Vector2 offsetCoordinates, HexOrientation orientation)
     {
         this.orientation = orientation;
