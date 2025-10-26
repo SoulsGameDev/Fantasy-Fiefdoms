@@ -15,10 +15,42 @@ public enum InputEvent
 public class HexCellStateManager
 {
     private HexCellInteractionState interactionState;
+    private HexCell cell; // Reference to cell for guard evaluation
 
-    public HexCellStateManager(HexCellInteractionState interactionState)
+    // Enable/disable guards for this specific cell (overrides global setting)
+    private bool? guardsEnabledOverride = null;
+
+    // Event fired when a transition is blocked by guards
+    public event Action<CellState, CellState, string> OnTransitionBlocked;
+
+    public HexCellStateManager(HexCellInteractionState interactionState, HexCell cell = null)
     {
         this.interactionState = interactionState;
+        this.cell = cell;
+    }
+
+    /// <summary>
+    /// Set the cell reference (if not provided in constructor)
+    /// </summary>
+    public void SetCell(HexCell cell)
+    {
+        this.cell = cell;
+    }
+
+    /// <summary>
+    /// Override guard evaluation for this cell
+    /// </summary>
+    public void SetGuardsEnabled(bool enabled)
+    {
+        guardsEnabledOverride = enabled;
+    }
+
+    /// <summary>
+    /// Clear guard override (use global setting)
+    /// </summary>
+    public void ClearGuardsOverride()
+    {
+        guardsEnabledOverride = null;
     }
 
     public void HandleInput(InputEvent inputEvent)
@@ -46,9 +78,14 @@ public class HexCellStateManager
                 break;
         }
 
+        // Check if transition is valid and allowed by guards
         if (nextState != currentState)
         {
-            interactionState.SetState(nextState);
+            if (EvaluateGuards(currentState, nextState, inputEvent))
+            {
+                interactionState.SetState(nextState);
+            }
+            // If guards blocked the transition, state remains unchanged
         }
     }
 
@@ -128,19 +165,138 @@ public class HexCellStateManager
         }
     }
 
-    // Public methods for programmatic state changes (not tied to input)
+    // ===== Guard Evaluation =====
+
+    /// <summary>
+    /// Evaluate guards for a transition
+    /// </summary>
+    private bool EvaluateGuards(CellState from, CellState to, InputEvent inputEvent)
+    {
+        // Check if guards are disabled for this cell
+        if (guardsEnabledOverride.HasValue && !guardsEnabledOverride.Value)
+        {
+            return true; // Guards disabled, allow transition
+        }
+
+        // Create guard context
+        var context = new GuardContext(cell, from, to, inputEvent);
+
+        // Evaluate using the registry
+        var result = TransitionGuardRegistry.Instance.EvaluateTransition(context);
+
+        if (!result.Success)
+        {
+            // Fire event for blocked transition
+            OnTransitionBlocked?.Invoke(from, to, result.Reason);
+        }
+
+        return result.Success;
+    }
+
+    /// <summary>
+    /// Check if a transition would be allowed (without executing it)
+    /// </summary>
+    public bool CanTransition(CellState toState, InputEvent inputEvent)
+    {
+        CellState currentState = interactionState.State;
+
+        if (currentState == toState)
+        {
+            return false; // Can't transition to same state
+        }
+
+        // Check if this input would lead to this state
+        CellState predictedState = PredictNextState(currentState, inputEvent);
+
+        if (predictedState != toState)
+        {
+            return false; // This input wouldn't lead to target state
+        }
+
+        // Check guards
+        var context = new GuardContext(cell, currentState, toState, inputEvent);
+        return TransitionGuardRegistry.Instance.CanTransition(context);
+    }
+
+    /// <summary>
+    /// Predict the next state for a given input (without guards)
+    /// </summary>
+    private CellState PredictNextState(CellState current, InputEvent inputEvent)
+    {
+        switch (current)
+        {
+            case CellState.Invisible:
+                return HandleInvisibleState(inputEvent);
+            case CellState.Visible:
+                return HandleVisibleState(inputEvent);
+            case CellState.Highlighted:
+                return HandleHighlightedState(inputEvent);
+            case CellState.Selected:
+                return HandleSelectedState(inputEvent);
+            case CellState.Focused:
+                return HandleFocusedState(inputEvent);
+            default:
+                return current;
+        }
+    }
+
+    // ===== Public Methods =====
+
+    /// <summary>
+    /// Reveal cell from fog of war
+    /// </summary>
     public void RevealFromFog()
     {
         HandleInput(InputEvent.RevealFog);
     }
 
+    /// <summary>
+    /// Deselect the cell
+    /// </summary>
     public void Deselect()
     {
         HandleInput(InputEvent.Deselect);
     }
 
+    /// <summary>
+    /// Force a state change without guard evaluation or input validation.
+    /// Use with caution - primarily for undo/redo or debugging.
+    /// </summary>
     public void ForceState(CellState state)
     {
         interactionState.SetState(state);
+    }
+
+    /// <summary>
+    /// Attempt a transition with guard evaluation, returning success status
+    /// </summary>
+    public bool TryTransition(CellState toState, InputEvent inputEvent, out string failureReason)
+    {
+        CellState currentState = interactionState.State;
+        failureReason = null;
+
+        if (currentState == toState)
+        {
+            failureReason = "Already in target state";
+            return false;
+        }
+
+        // Create context
+        var context = new GuardContext(cell, currentState, toState, inputEvent);
+
+        // Evaluate guards
+        var result = TransitionGuardRegistry.Instance.EvaluateTransition(context);
+
+        if (result.Success)
+        {
+            interactionState.SetState(toState);
+            return true;
+        }
+        else
+        {
+            failureReason = result.Reason;
+            OnTransitionBlocked?.Invoke(currentState, toState, result.Reason);
+            return false;
+        }
     }
 }

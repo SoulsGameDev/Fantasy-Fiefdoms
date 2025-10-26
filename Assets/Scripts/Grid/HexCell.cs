@@ -27,7 +27,7 @@ public class HexCell
     {
         // Initialize states
         interactionState = new HexCellInteractionState(CellState.Invisible);
-        stateManager = new HexCellStateManager(interactionState);
+        stateManager = new HexCellStateManager(interactionState, this); // Pass cell reference for guard evaluation
         pathfindingState = new HexCellPathfindingState();
 
         // Subscribe to granular state events for specific behaviors
@@ -42,6 +42,16 @@ public class HexCell
 
         // Subscribe to general state change for logging/debugging
         interactionState.OnStateChanged += OnStateChanged;
+
+        // Subscribe to transition blocked events for feedback
+        stateManager.OnTransitionBlocked += OnTransitionBlocked;
+    }
+
+    // Handler for when transitions are blocked by guards
+    private void OnTransitionBlocked(CellState from, CellState to, string reason)
+    {
+        // Debug.Log($"Transition blocked for {OffsetCoordinates}: {from} -> {to}. Reason: {reason}");
+        // TODO: Show UI feedback (tooltip, sound effect, etc.)
     }
 
     // General state change handler (for logging/debugging)
