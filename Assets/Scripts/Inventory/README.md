@@ -113,29 +113,35 @@ CommandHistory.Instance.Redo();
 └─────────────────────────────────────┘
 ```
 
-## Current Status: Phase 2 Complete ✓
+## Current Status: Phase 4 Complete ✓
 
-### Implemented (Phase 1 & 2)
+### Implemented (Phases 1-4)
 - ✅ Core data structures (ItemStack, InventorySlot)
 - ✅ Base Inventory class with O(1) lookups
 - ✅ ItemType & EquipmentType ScriptableObjects
 - ✅ InventoryManager Singleton
-- ✅ Guard system (CanAdd, HasSpace, CanEquip)
-- ✅ Command system (Add, Remove, Move, Equip, Unequip)
-- ✅ Equipment system with slot management
-- ✅ Item effect system (StatModifier, Heal, Passive)
-- ✅ Two-handed weapon support
-- ✅ Example scripts and comprehensive documentation
+- ✅ Guard system (CanAdd, HasSpace, CanEquip, CanBuy, CanSell, CanOpenContainer)
+- ✅ Command system (Add, Remove, Move, Equip, Unequip, Buy, Sell)
+- ✅ Equipment system with slot management and two-handed weapon support
+- ✅ Item effect system (StatModifier, Heal, RestoreMana, Passive)
+- ✅ Complete UI system with drag-and-drop
+  - ItemSlotUI, InventoryPanel, EquipmentPanel
+  - ItemTooltip with detailed stat display
+  - DragDropManager with visual feedback
+- ✅ Specialized inventory types
+  - MerchantInventory: Buy/sell with pricing and restock
+  - QuestInventory: Quest item management with lifecycle tracking
+  - ContainerInventory: Locks, keys, lockpicking, and loot generation
+- ✅ Example scripts (InventorySystemExample, EquipmentSystemExample, InventoryUIExample, MerchantSystemExample)
+- ✅ Comprehensive documentation (README, UI_GUIDE, planning doc)
 
-### Coming Next (Phase 3)
-- UI system (InventoryPanel, ItemSlotUI)
-- Drag-and-drop functionality
-- Item tooltips
-- Visual feedback
+### Coming Next (Phase 5)
+- Consumable system (UseItemCommand)
+- Advanced effects (buffs, debuffs, DoT)
+- Cooldown system
+- Effect duration tracking
 
 ### Future Phases
-- Phase 3: UI system
-- Phase 4: Specialized inventories (merchant, quest, container)
 - Phase 5: Consumables and advanced effects
 - Phase 6: Unique items, durability, crafting
 - Phase 7: Optimization, serialization, polish
@@ -249,6 +255,94 @@ stack.TrySplit(amount, out newStack);
 bool canMerge = stack.CanMergeWith(otherStack);
 ```
 
+### MerchantInventory (Phase 4)
+
+```csharp
+using Inventory.Core;
+using Inventory.Commands;
+
+// Create merchant inventory
+var merchant = new MerchantInventory(
+    inventoryID: "merchant_general",
+    maxSlots: 50,
+    maxWeight: 500f,
+    infiniteStock: false,
+    buyPriceMultiplier: 1.2f,  // Player buys at 120% of base value
+    sellPriceMultiplier: 0.5f, // Player sells at 50% of base value
+    merchantGold: 5000
+);
+
+// Buy from merchant
+int playerGold = 500;
+var buyCmd = new BuyItemCommand(merchant, playerInventory, "health_potion", 3);
+if (buyCmd.CanExecute())
+{
+    buyCmd.Execute();
+    playerGold = PlayerPrefs.GetInt("PlayerGold", 0);
+}
+
+// Sell to merchant
+var sellCmd = new SellItemCommand(merchant, playerInventory, "old_sword", 1);
+sellCmd.Execute();
+
+// Setup auto-restock
+merchant.AddRestockItem("health_potion", quantity: 5, restockEveryNSeconds: 300f);
+merchant.Restock(); // Manual restock
+```
+
+### QuestInventory (Phase 4)
+
+```csharp
+// Create quest inventory
+var questInventory = new QuestInventory("player_quests", maxSlots: 30);
+
+// Start quest
+questInventory.StartQuest("find_ancient_artifact");
+
+// Add quest item
+ItemStack questItem = itemType.CreateStack(1);
+questInventory.AddQuestItem("find_ancient_artifact", questItem);
+
+// Check quest progress
+bool hasItem = questInventory.HasQuestItem("find_ancient_artifact", "ancient_key", 1);
+
+// Complete quest (removes quest items)
+questInventory.CompleteQuest("find_ancient_artifact", removeItems: true);
+```
+
+### ContainerInventory (Phase 4)
+
+```csharp
+// Create container (chest, crate, barrel, etc.)
+var chest = new ContainerInventory(
+    inventoryID: "treasure_chest_01",
+    containerType: ContainerType.Chest,
+    maxSlots: 20,
+    maxWeight: 100f
+);
+
+// Lock the container
+chest.Lock(requiredKeyID: "golden_key", lockLevel: 3);
+
+// Try to open (checks for key in player inventory)
+if (chest.TryOpen(playerInventory, out string reason))
+{
+    Debug.Log("Chest opened!");
+}
+
+// Or try to pick the lock
+if (chest.TryPickLock(playerLockpickingSkill: 5, out reason))
+{
+    Debug.Log("Lock picked successfully!");
+}
+
+// Generate random loot
+chest.GenerateLoot(lootLevel: 2);
+
+// Auto-despawn settings
+chest.SetAutoDespawn(despawnTimeSeconds: 300f, despawnWhenEmpty: true);
+```
+
 ## Performance Notes
 
 - **Add/Remove**: O(1) average case with Dictionary lookup
@@ -267,8 +361,13 @@ This inventory system integrates with Fantasy Fiefdoms' existing patterns:
 
 ## Need Help?
 
-- Check `InventorySystemExample.cs` for usage examples
+- Check example scripts for usage patterns:
+  - `InventorySystemExample.cs` - Basic inventory operations
+  - `EquipmentSystemExample.cs` - Equipment and effects
+  - `InventoryUIExample.cs` - UI integration
+  - `MerchantSystemExample.cs` - Trading and merchants
 - See `INVENTORY_SYSTEM_PLAN.md` for detailed architecture
+- See `UI_GUIDE.md` for complete UI setup instructions
 - All public APIs have XML documentation
 
 ## License
