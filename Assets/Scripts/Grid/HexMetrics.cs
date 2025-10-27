@@ -465,4 +465,46 @@ public static class HexMetrics
     {
         return CubeToOffset(AxialToCube(CoordinateToAxial(x, z, hexSize, orientation)), orientation);
     }
+
+    /// <summary>
+    /// Get the axial coordinates of all neighbors for a given cell
+    /// </summary>
+    /// <param name="axialCoordinates">The axial coordinates of the cell</param>
+    /// <param name="orientation">The orientation of the hex grid</param>
+    /// <returns>List of neighbor axial coordinates</returns>
+    public static List<Vector2> GetNeighbourCoordinatesList(Vector2 axialCoordinates, HexOrientation orientation = HexOrientation.PointyTop)
+    {
+        // Axial coordinate neighbor offsets
+        // For pointy-top hexagons
+        Vector2[] pointyOffsets = new Vector2[]
+        {
+            new Vector2(+1, 0),  // East
+            new Vector2(+1, -1), // Northeast
+            new Vector2(0, -1),  // Northwest
+            new Vector2(-1, 0),  // West
+            new Vector2(-1, +1), // Southwest
+            new Vector2(0, +1)   // Southeast
+        };
+
+        // For flat-top hexagons
+        Vector2[] flatOffsets = new Vector2[]
+        {
+            new Vector2(+1, 0),  // Southeast
+            new Vector2(+1, -1), // Northeast
+            new Vector2(0, -1),  // North
+            new Vector2(-1, 0),  // Northwest
+            new Vector2(-1, +1), // Southwest
+            new Vector2(0, +1)   // South
+        };
+
+        Vector2[] offsets = (orientation == HexOrientation.PointyTop) ? pointyOffsets : flatOffsets;
+        List<Vector2> neighbors = new List<Vector2>(6);
+
+        foreach (Vector2 offset in offsets)
+        {
+            neighbors.Add(axialCoordinates + offset);
+        }
+
+        return neighbors;
+    }
 }
