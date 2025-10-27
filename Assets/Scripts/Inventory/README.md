@@ -113,22 +113,25 @@ CommandHistory.Instance.Redo();
 └─────────────────────────────────────┘
 ```
 
-## Current Status: Phase 1 Complete ✓
+## Current Status: Phase 2 Complete ✓
 
-### Implemented (Phase 1)
+### Implemented (Phase 1 & 2)
 - ✅ Core data structures (ItemStack, InventorySlot)
 - ✅ Base Inventory class with O(1) lookups
-- ✅ ItemType ScriptableObject
+- ✅ ItemType & EquipmentType ScriptableObjects
 - ✅ InventoryManager Singleton
-- ✅ Guard system (CanAddItemGuard, HasSpaceGuard)
-- ✅ Command system (AddItemCommand, RemoveItemCommand)
-- ✅ Example script and documentation
+- ✅ Guard system (CanAdd, HasSpace, CanEquip)
+- ✅ Command system (Add, Remove, Move, Equip, Unequip)
+- ✅ Equipment system with slot management
+- ✅ Item effect system (StatModifier, Heal, Passive)
+- ✅ Two-handed weapon support
+- ✅ Example scripts and comprehensive documentation
 
-### Coming Next (Phase 2)
-- Equipment system with slots
-- EquipItemCommand / UnequipItemCommand
-- Stat modifier effects
-- Equipment restrictions
+### Coming Next (Phase 3)
+- UI system (InventoryPanel, ItemSlotUI)
+- Drag-and-drop functionality
+- Item tooltips
+- Visual feedback
 
 ### Future Phases
 - Phase 3: UI system
