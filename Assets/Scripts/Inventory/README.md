@@ -113,15 +113,15 @@ CommandHistory.Instance.Redo();
 └─────────────────────────────────────┘
 ```
 
-## Current Status: Phase 5 Complete ✓
+## Current Status: Phase 6 Complete ✓
 
-### Implemented (Phases 1-5)
+### Implemented (Phases 1-6)
 - ✅ Core data structures (ItemStack, InventorySlot)
 - ✅ Base Inventory class with O(1) lookups
-- ✅ ItemType, EquipmentType, & ConsumableType ScriptableObjects
+- ✅ ItemType, EquipmentType, ConsumableType, & CraftingRecipe ScriptableObjects
 - ✅ InventoryManager Singleton
 - ✅ Guard system (CanAdd, HasSpace, CanEquip, CanBuy, CanSell, CanOpenContainer, CanUseItem)
-- ✅ Command system (Add, Remove, Move, Equip, Unequip, Buy, Sell, UseItem)
+- ✅ Command system (Add, Remove, Move, Equip, Unequip, Buy, Sell, UseItem, CraftItem)
 - ✅ Equipment system with slot management and two-handed weapon support
 - ✅ Item effect system (StatModifier, Heal, RestoreMana, Passive, Buff, Debuff, DoT, HoT)
 - ✅ Complete UI system with drag-and-drop
@@ -138,17 +138,22 @@ CommandHistory.Instance.Redo();
   - CooldownTracker: Per-item cooldown management
   - EffectManager: Duration tracking and automatic ticking
   - Advanced effects: Buffs, debuffs, DoT, HoT
-- ✅ Example scripts (InventorySystemExample, EquipmentSystemExample, InventoryUIExample, MerchantSystemExample, ConsumableSystemExample)
+- ✅ Advanced features
+  - ItemInstance: Unique items with quality tiers and modifiers
+  - Durability system with damage/repair
+  - Crafting system with recipes and stations
+  - InventoryUtilities: Auto-sort, quick-stack, compact, search
+  - Statistics and filtering
+- ✅ Example scripts (InventorySystemExample, EquipmentSystemExample, InventoryUIExample, MerchantSystemExample, ConsumableSystemExample, AdvancedFeaturesExample)
 - ✅ Comprehensive documentation (README, UI_GUIDE, planning doc)
 
-### Coming Next (Phase 6)
-- Unique items with random modifiers
-- Durability system
-- Item quality tiers
-- Crafting system
+### Coming Next (Phase 7)
+- UI object pooling
+- Save/load serialization
+- Performance profiling and optimization
+- Complete documentation
 
 ### Future Phases
-- Phase 6: Unique items, durability, crafting
 - Phase 7: Optimization, serialization, polish
 
 ## File Structure
@@ -447,6 +452,7 @@ This inventory system integrates with Fantasy Fiefdoms' existing patterns:
   - `InventoryUIExample.cs` - UI integration
   - `MerchantSystemExample.cs` - Trading and merchants
   - `ConsumableSystemExample.cs` - Consumables, effects, and cooldowns
+  - `AdvancedFeaturesExample.cs` - Unique items, durability, crafting, sorting
 - See `INVENTORY_SYSTEM_PLAN.md` for detailed architecture
 - See `UI_GUIDE.md` for complete UI setup instructions
 - All public APIs have XML documentation
