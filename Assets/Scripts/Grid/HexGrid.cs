@@ -105,7 +105,37 @@ public class HexGrid : MonoBehaviour
             }
         }
 
+        // Initialize neighbors for all cells
+        InitializeNeighbors(hexCells);
+
         return hexCells;
+    }
+
+    /// <summary>
+    /// Initialize neighbor references for all cells in the grid
+    /// </summary>
+    private void InitializeNeighbors(List<HexCell> hexCells)
+    {
+        foreach (HexCell cell in hexCells)
+        {
+            List<HexCell> neighbours = new List<HexCell>();
+
+            // Get the neighbor coordinates for this cell
+            List<Vector2> neighborCoordinates = HexMetrics.GetNeighbourCoordinatesList(cell.AxialCoordinates, Orientation);
+
+            // Find each neighbor cell
+            foreach (Vector2 neighbourCoordinate in neighborCoordinates)
+            {
+                HexCell neighbor = hexCells.Find(c => c.AxialCoordinates == neighbourCoordinate);
+                if (neighbor != null)
+                {
+                    neighbours.Add(neighbor);
+                }
+            }
+
+            // Set the neighbors for this cell
+            cell.SetNeighbours(neighbours);
+        }
     }
 
     //Handled by coroutine and currently the most expensive operation

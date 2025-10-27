@@ -37,6 +37,9 @@ public class CameraController : Singleton<CameraController>
     [SerializeField] private bool enableRotation = false;
     [SerializeField] private float cameraRotationSpeed = 50f;
 
+    [Header("Control Settings")]
+    [SerializeField] private bool isLocked = false;
+
     // Cached references
     private Transform cameraTargetTransform;
 
@@ -44,7 +47,15 @@ public class CameraController : Singleton<CameraController>
     private Coroutine zoomCoroutine;
     private Coroutine rotateCoroutine;
 
+    // Events
     public event Action<CinemachineVirtualCamera> onCameraChanged;
+    public event Action onSelectAction;
+    public event Action onDeselectAction;
+    public event Action onFocusAction;
+
+    // Public properties
+    public bool IsLocked { get => isLocked; set => isLocked = value; }
+    public GameObject CameraTarget { get => cameraTarget; }
 
     void Start()
     {
@@ -102,6 +113,9 @@ public class CameraController : Singleton<CameraController>
 
     public void OnPanChange(InputAction.CallbackContext context)
     {
+        if (isLocked)
+            return;
+
         if (context.performed)
         {
             SafeStopCoroutine(ref panCoroutine);
@@ -116,6 +130,9 @@ public class CameraController : Singleton<CameraController>
 
     public void OnZoomChanged(InputAction.CallbackContext context)
     {
+        if (isLocked)
+            return;
+
         if (context.performed)
         {
             SafeStopCoroutine(ref zoomCoroutine);
@@ -129,7 +146,7 @@ public class CameraController : Singleton<CameraController>
 
     public void OnRotateChange(InputAction.CallbackContext context)
     {
-        if (!enableRotation)
+        if (!enableRotation || isLocked)
             return;
 
         if (context.performed)
@@ -153,10 +170,12 @@ public class CameraController : Singleton<CameraController>
         {
             //Debug.Log("Double tapped - Focus");
             ChangeCamera(CameraMode.Focus);
+            onFocusAction?.Invoke();
         }
         else if (context.canceled)
         {
             //Debug.Log("Single tap - Select");
+            onSelectAction?.Invoke();
         }
     }
 
