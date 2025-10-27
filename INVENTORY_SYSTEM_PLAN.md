@@ -3,7 +3,7 @@
 **Project:** Fantasy Fiefdoms
 **Branch:** claude/plan-item-system-011CUXmz3FDqgbbhogmX9GKW
 **Created:** 2025-10-27
-**Status:** Phase 4 Complete ✓
+**Status:** Phase 5 Complete ✓
 
 ---
 
@@ -207,18 +207,41 @@ All inventory operations use ICommand for undo/redo:
 
 ---
 
-### Phase 5: Consumables & Effects 📋 PENDING
+### Phase 5: Consumables & Effects ✅ COMPLETE
 **Goal:** Usable items and advanced effects
 
-- [ ] Implement ConsumableType ScriptableObject
-- [ ] Implement UseItemCommand
-- [ ] Create ConsumableEffect (healing, buffs)
-- [ ] Create PassiveEffect (auras)
-- [ ] Implement cooldown system
-- [ ] Add effect duration tracking
-- [ ] Create effect UI indicators
+- [x] Implement ConsumableType ScriptableObject
+  - Cast time, cooldown, combat restrictions
+  - Target types (self, ally, enemy, ground)
+  - Uses per stack, consume on use
+  - Effect descriptions and validation
+- [x] Implement UseItemCommand with full undo/redo
+  - Cooldown integration
+  - Effect application
+  - Sound and animation triggers
+- [x] Create AdvancedEffects system
+  - BuffEffect: Temporary stat increases
+  - DebuffEffect: Temporary stat decreases
+  - DamageOverTimeEffect: Periodic damage (DoT)
+  - HealOverTimeEffect: Periodic healing (HoT)
+- [x] Implement CooldownTracker component
+  - Per-item cooldown tracking
+  - Event system for cooldown start/expire
+  - Progress queries and reduction support
+- [x] Implement EffectManager component
+  - Active effect tracking with duration
+  - Automatic effect ticking (DoT/HoT)
+  - Effect stacking and refresh logic
+  - Integration with ICharacterStats
+- [x] Create ConsumableGuards
+  - CanUseItemGuard: Validates item usage
+  - CanApplyEffectGuard: Validates effect application
+  - IsNotOnCooldownGuard: Cooldown validation
+- [x] Create ConsumableSystemExample with comprehensive testing
 
-**Deliverable:** Can use potions, scrolls, and consumables
+**Deliverable:** Can use potions, scrolls, and consumables ✓
+
+**Completed:** 2025-10-27
 
 ---
 
@@ -257,13 +280,13 @@ All inventory operations use ICommand for undo/redo:
 
 ### Overall Progress
 - **Total Tasks:** 67
-- **Completed:** 42
+- **Completed:** 49
 - **In Progress:** 0
-- **Remaining:** 25
-- **Progress:** 62.7%
+- **Remaining:** 18
+- **Progress:** 73.1%
 
 ### Current Sprint
-**Focus:** Phase 5 - Consumables & Effects
+**Focus:** Phase 6 - Advanced Features
 **Started:** TBD
 **Target Completion:** TBD
 
@@ -297,6 +320,13 @@ All inventory operations use ICommand for undo/redo:
   - ContainerInventory with locks and loot generation
   - Trade commands (BuyItemCommand, SellItemCommand)
   - Trade guards and merchant example script
+- ✅ 2025-10-27: **Phase 5 Complete** - Consumables and effects system implemented
+  - ConsumableType with targeting and cooldowns
+  - UseItemCommand with full undo/redo
+  - Advanced effects (Buff, Debuff, DoT, HoT)
+  - CooldownTracker for per-item cooldown management
+  - EffectManager for duration tracking and ticking
+  - Consumable guards and comprehensive example
 
 ### Blockers
 None currently
@@ -554,6 +584,11 @@ Following the pathfinding Jobs pattern:
 - **2025-10-27:** Container system supports multiple types (Chest, Crate, Barrel, Corpse, etc.)
 - **2025-10-27:** Lock system supports both key-based and skill-based unlocking
 - **2025-10-27:** All trade operations use Command pattern for full transaction history
+- **2025-10-27:** EffectManager uses Update loop for automatic effect ticking and cleanup
+- **2025-10-27:** CooldownTracker tracks per-item cooldowns with event system for UI updates
+- **2025-10-27:** ConsumableType supports targeting modes (self, ally, enemy, ground)
+- **2025-10-27:** Effects can stack or refresh based on configuration
+- **2025-10-27:** ActiveEffect class tracks duration, tick rate, and expiration automatically
 
 ### Open Questions
 - None currently
@@ -561,6 +596,15 @@ Following the pathfinding Jobs pattern:
 ---
 
 ## Version History
+
+### v0.6.0 - Phase 5 Complete (2025-10-27)
+- ✅ Consumables and effects system implemented
+- ✅ 7 new classes created (ConsumableType, UseItemCommand, AdvancedEffects, CooldownTracker, EffectManager, ConsumableGuards, ConsumableSystemExample)
+- ✅ Full consumable system with cooldowns and duration tracking
+- ✅ Advanced effect types (Buff, Debuff, DoT, HoT)
+- ✅ Effect ticking and automatic cleanup
+- ✅ Comprehensive example with real-time GUI display
+- Ready for Phase 6 (Advanced Features)
 
 ### v0.5.0 - Phase 4 Complete (2025-10-27)
 - ✅ Specialized inventory types implemented
@@ -598,4 +642,4 @@ Following the pathfinding Jobs pattern:
 ---
 
 **Last Updated:** 2025-10-27
-**Next Review:** After Phase 5 completion
+**Next Review:** After Phase 6 completion

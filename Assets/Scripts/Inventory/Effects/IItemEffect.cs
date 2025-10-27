@@ -88,6 +88,10 @@ namespace Inventory.Effects
                 ItemEffectType.Heal => new HealEffect(),
                 ItemEffectType.RestoreMana => new RestoreManaEffect(),
                 ItemEffectType.Passive => new PassiveEffect(),
+                ItemEffectType.Buff => new BuffEffect(),
+                ItemEffectType.Debuff => new DebuffEffect(),
+                ItemEffectType.DamageOverTime => new DamageOverTimeEffect(),
+                ItemEffectType.HealOverTime => new HealOverTimeEffect(),
                 _ => new NullEffect()
             };
         }
@@ -122,6 +126,24 @@ namespace Inventory.Effects
             {
                 IItemEffect effect = CreateEffect(effectData.EffectType);
                 effect.Remove(target, effectData);
+            }
+        }
+
+        /// <summary>
+        /// Applies all effects from a consumable item to a target.
+        /// </summary>
+        public static void ApplyConsumableEffects(GameObject target, ConsumableType consumable)
+        {
+            if (target == null || consumable == null)
+                return;
+
+            foreach (ItemEffectData effectData in consumable.ConsumableEffects)
+            {
+                IItemEffect effect = CreateEffect(effectData.EffectType);
+                if (effect.CanApply(target, effectData))
+                {
+                    effect.Apply(target, effectData);
+                }
             }
         }
     }

@@ -113,17 +113,17 @@ CommandHistory.Instance.Redo();
 └─────────────────────────────────────┘
 ```
 
-## Current Status: Phase 4 Complete ✓
+## Current Status: Phase 5 Complete ✓
 
-### Implemented (Phases 1-4)
+### Implemented (Phases 1-5)
 - ✅ Core data structures (ItemStack, InventorySlot)
 - ✅ Base Inventory class with O(1) lookups
-- ✅ ItemType & EquipmentType ScriptableObjects
+- ✅ ItemType, EquipmentType, & ConsumableType ScriptableObjects
 - ✅ InventoryManager Singleton
-- ✅ Guard system (CanAdd, HasSpace, CanEquip, CanBuy, CanSell, CanOpenContainer)
-- ✅ Command system (Add, Remove, Move, Equip, Unequip, Buy, Sell)
+- ✅ Guard system (CanAdd, HasSpace, CanEquip, CanBuy, CanSell, CanOpenContainer, CanUseItem)
+- ✅ Command system (Add, Remove, Move, Equip, Unequip, Buy, Sell, UseItem)
 - ✅ Equipment system with slot management and two-handed weapon support
-- ✅ Item effect system (StatModifier, Heal, RestoreMana, Passive)
+- ✅ Item effect system (StatModifier, Heal, RestoreMana, Passive, Buff, Debuff, DoT, HoT)
 - ✅ Complete UI system with drag-and-drop
   - ItemSlotUI, InventoryPanel, EquipmentPanel
   - ItemTooltip with detailed stat display
@@ -132,17 +132,22 @@ CommandHistory.Instance.Redo();
   - MerchantInventory: Buy/sell with pricing and restock
   - QuestInventory: Quest item management with lifecycle tracking
   - ContainerInventory: Locks, keys, lockpicking, and loot generation
-- ✅ Example scripts (InventorySystemExample, EquipmentSystemExample, InventoryUIExample, MerchantSystemExample)
+- ✅ Consumable system with effects and cooldowns
+  - ConsumableType: Potions, scrolls, food with targeting
+  - UseItemCommand: Full undo/redo support
+  - CooldownTracker: Per-item cooldown management
+  - EffectManager: Duration tracking and automatic ticking
+  - Advanced effects: Buffs, debuffs, DoT, HoT
+- ✅ Example scripts (InventorySystemExample, EquipmentSystemExample, InventoryUIExample, MerchantSystemExample, ConsumableSystemExample)
 - ✅ Comprehensive documentation (README, UI_GUIDE, planning doc)
 
-### Coming Next (Phase 5)
-- Consumable system (UseItemCommand)
-- Advanced effects (buffs, debuffs, DoT)
-- Cooldown system
-- Effect duration tracking
+### Coming Next (Phase 6)
+- Unique items with random modifiers
+- Durability system
+- Item quality tiers
+- Crafting system
 
 ### Future Phases
-- Phase 5: Consumables and advanced effects
 - Phase 6: Unique items, durability, crafting
 - Phase 7: Optimization, serialization, polish
 
@@ -343,6 +348,81 @@ chest.GenerateLoot(lootLevel: 2);
 chest.SetAutoDespawn(despawnTimeSeconds: 300f, despawnWhenEmpty: true);
 ```
 
+### ConsumableType & Effects (Phase 5)
+
+```csharp
+using Inventory.Core;
+using Inventory.Commands;
+using Inventory.Effects;
+
+// Setup player with required components
+GameObject player = GameObject.Find("Player");
+CooldownTracker cooldownTracker = player.AddComponent<CooldownTracker>();
+EffectManager effectManager = player.AddComponent<EffectManager>();
+
+// Use a consumable (health potion, buff, etc.)
+var useCmd = new UseItemCommand(
+    inventory: playerInventory,
+    itemID: "health_potion",
+    user: player,
+    target: player, // Can target self or others
+    cooldownTracker: cooldownTracker
+);
+
+if (useCmd.CanExecute())
+{
+    useCmd.Execute();
+    Debug.Log("Used health potion!");
+}
+
+// Check cooldown status
+bool isReady = !cooldownTracker.IsOnCooldown("health_potion");
+float remaining = cooldownTracker.GetRemainingCooldown("health_potion");
+
+// Check active effects
+var activeEffects = effectManager.GetAllActiveEffects();
+foreach (var effect in activeEffects)
+{
+    Debug.Log($"{effect.Description}: {effect.RemainingDuration:F1}s remaining");
+}
+
+// Validate before using
+var guard = new CanUseItemGuard(playerInventory, "health_potion", player, cooldownTracker);
+var result = guard.Evaluate(null);
+if (!result.Success)
+{
+    Debug.LogWarning(result.Reason);
+}
+
+// Create consumable with effects (in Unity Editor)
+/*
+ConsumableType healthPotion = ScriptableObject.CreateInstance<ConsumableType>();
+healthPotion.ItemID = "health_potion";
+healthPotion.Name = "Health Potion";
+healthPotion.CooldownSeconds = 5f;
+healthPotion.ConsumeOnUse = true;
+
+// Add heal effect
+var healEffect = new ItemEffectData
+{
+    EffectType = ItemEffectType.Heal,
+    Value = 50f,
+    Description = "Restores 50 health"
+};
+healthPotion.ConsumableEffects.Add(healEffect);
+
+// Add HoT effect
+var hotEffect = new ItemEffectData
+{
+    EffectType = ItemEffectType.HealOverTime,
+    Value = 10f,
+    Duration = 5f,
+    Description = "10 health per second for 5 seconds"
+};
+healthPotion.ConsumableEffects.Add(hotEffect);
+*/
+```
+
 ## Performance Notes
 
 - **Add/Remove**: O(1) average case with Dictionary lookup
@@ -366,6 +446,7 @@ This inventory system integrates with Fantasy Fiefdoms' existing patterns:
   - `EquipmentSystemExample.cs` - Equipment and effects
   - `InventoryUIExample.cs` - UI integration
   - `MerchantSystemExample.cs` - Trading and merchants
+  - `ConsumableSystemExample.cs` - Consumables, effects, and cooldowns
 - See `INVENTORY_SYSTEM_PLAN.md` for detailed architecture
 - See `UI_GUIDE.md` for complete UI setup instructions
 - All public APIs have XML documentation
