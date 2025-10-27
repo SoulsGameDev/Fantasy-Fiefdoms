@@ -25,6 +25,10 @@ public class HexCell
 
     private Transform terrain;
 
+    // Public accessors for state machines
+    public HexCellInteractionState InteractionState => interactionState;
+    public HexCellPathfindingState PathfindingState => pathfindingState;
+
     // Constructor - initializes state machine
     public HexCell()
     {
@@ -70,6 +74,12 @@ public class HexCell
     {
         // Cell is now visible (fog of war revealed)
         SetFogOfWar(false);
+
+        // Mark as explored for pathfinding
+        if (pathfindingState != null)
+        {
+            pathfindingState.IsExplored = true;
+        }
     }
 
     private void OnExitVisible()
@@ -231,6 +241,12 @@ public class HexCell
     public void SetTerrainType(TerrainType terrainType)
     {
         TerrainType = terrainType;
+
+        // Update pathfinding state based on terrain properties
+        if (pathfindingState != null && terrainType != null)
+        {
+            pathfindingState.UpdateFromTerrain(terrainType);
+        }
     }
 
     public void CreateTerrain()
